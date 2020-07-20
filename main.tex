@@ -1,5 +1,8 @@
 \documentclass{article}
+\usepackage{graphicx}
 \usepackage[utf8]{inputenc}
+
+\graphicspath{ {./images/} }
 
 \title{Dissertation}
 \author{Quentin Sonnefraud}
@@ -66,15 +69,39 @@ In short, the DTW algorithm consists of three steps:
     
 \end{itemize}
 
-\begin{tabular}{|l|c|r|}
+\subsection{Interpretation of results after running the algorithms}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{plot_0.png}
+    \caption{Benchmark 1 and 2 From sleeping Barber}
+    \label{fig:mesh1}
+\end{figure}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{plot_1.png}
+    \caption{Benchmark 2 and 3 From sleeping Barber}
+    \label{fig:mesh1}
+\end{figure}
+
+\begin{table}[h!]
+\begin{tabular}{|l|c|c|c|c|c|c|}
    \hline
-   benchmarks & pcm & frechet distance & area & curve length measure & DTW & directed hausdorf \\
+   benchmarks & pcm & frechet distance & area & curve length & DTW & directed hausdorf \\
    \hline
-   1.1 & 1.2 & 1.3 \\
+   1 \&  2 & 132 & 313 & 81918 & 14 & 68757 & 197\\
    \hline
-   2.1 & 2.2 & 2.3 \\
+   2 \& 3 & 573 & 295 & 32960 & 48 & 191649 & 7 \\
    \hline
-\end{tabular}
+\end{tabular} \\ 
+\caption{Comparaison between two inequal benchmarks and two equal benmarks}
+\end{table}
+
+
+As expected the only algorithm that seems to work is the directed hausdorf algorithm because it is not influence by the size of the dataset, indeed as the curve lenght increase the difference of the score increase. 
+I have put a treshold of 20 with the directed hausdorf. When the direcred hausdorf value is more than 20 is interesting to look at the benchmark because it means that their is significant difference between the two benchmarks.
 
 \subsection{Conclusion of classification of changement of behaviour between benchmarks}
 
