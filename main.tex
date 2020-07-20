@@ -22,9 +22,9 @@ DUring this project I have review and try some techniques to quantify the differ
 
 First i have used area method to quantify the difference between curve, this an algorithm for calculating the Area between two curves in 2D space
 Strictly speaking, the expression area under the curve refers to the area A of the domain delimited by a curve (represented in an x-y diagram) and three straight lines (the x-axis and two vertical lines with abscissa a and b). If the curve has the equation $y=f(x)y=f(x)$, the area is $\dA=\int _{a}^{b}f(x)\,\mathrm {d} x$. This area is a true area (e.g. milliseconds for benchmarks) only if the function f has only positive (or zero) values over the interval [a,b] and if both the abscissa and the ordinate are lengths (with the same choice of unit, e.g. milliseconds for benchmarks).
+For the purpose of detecting if the behaviour has change between two benchmarks its not interesting because it quantify the area a a whole and area can be equal but not their behaviour
 
 \subsection{Hausdorff Distance }
-
 The Hausdorff distance is used to account for the maximum deviation between two polylines (L1, L2) (Taha and Hanbury 2015). By definition, two polylines L1 and L2 are at a Hausdorff distance (dH) from each other of less than d units, if each point of L1 is within d units of at least one point of L2, and if, reciprocally, each point of L2 is less than d units away from each other by at least one
 point of L1.
 
@@ -43,12 +43,10 @@ reduce calculation time: the algorithmic complexity of this algorithm is linear 
 This methods seems to be working better because there is no need for the dataset to know if the first clue of the first sequence must match the first clue of the other sequence and that
 the last clue of the first sequence must match the last clue of the other sequence (but it must not be its only match).
 
-\subsection{Fréchet disatasettance}
-We have presented a discrete variant of the Fréchet distance between curves in a metric
+\subsection{Fréchet distance}
+I have presented a discrete variant of the Fréchet distance between curves in a metric
 space, and they described a simple and efficient algorithm for computing this measure.
-Besides its own interest, discrete Fréchet distance may be used for approximately computing the Fréchet distance between two arbitrary curves, as an alternative to using
-
-the exact Fréchet distance between a polygonal approximation of the curves or an approximation of this value
+Besides its own interest, discrete Fréchet distance may be used for approximately computing the Fréchet distance between two arbitrary curves, as an alternative to using the exact Fréchet distance between a polygonal approximation of the curves or an approximation of this value
 
 \subsection{DTW}
 
@@ -64,8 +62,24 @@ In short, the DTW algorithm consists of three steps:
         \item b) Backtrack to find the minimum distance => global optimum
     \end{itemize}
     \item Result: A shift path that consists of the correspondence of the two equations.
+
     
 \end{itemize}
+
+\begin{tabular}{|l|c|r|}
+   \hline
+   benchmarks & pcm & frechet distance & area & curve length measure & DTW & directed hausdorf \\
+   \hline
+   1.1 & 1.2 & 1.3 \\
+   \hline
+   2.1 & 2.2 & 2.3 \\
+   \hline
+\end{tabular}
+
+\subsection{Conclusion of classification of changement of behaviour between benchmarks}
+
+The validation of an unsupervised classification, as well as the choice of the number of group always remain open questions. On real data, recognized criteria such as the distance difference or the silhouette index are optimal with only two groups, limiting the contribution of such an analysis.
+
 
 
 
