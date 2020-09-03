@@ -34,7 +34,7 @@ The first part is about applying the work done on warmup analysis by \cite{barre
 The second part is to review and apply a different approach to the warmup paper to quantify the behaviour or difference from the benchmark. This part will use comparison algorithms between curve to quantify the difference between two benchmarks. This comparison will quantify if a benchmark as changed in term of behaviour. In the third part, this dissertation will explain more technically how the data is managed with a PostgreSQL and node.js.\\
 
 
-\section{Warmup analysis and warmup State classification (Context}
+\section{Warmup analysis and warmup State classification (Context)}
 
 For the first expression of the need of Stefan Marr was to think about adding a feature, for his project RebenchDB. The project feature consists of trying to detect a performance difference between two versions of an algorithm. For that in this part of the dissertation I will briefly explain what is Just in Time Compilation and what consists the work done by \cite{barrett2017virtual}, then in the last part its the application in Python of the Paper with minor modifications of the algorithms that \cite{barrett2017virtual} present in their paper. We first need to define what is Just in time compilation and use and apply for the work already done by \cite{barrett2017virtual}
 
@@ -46,8 +46,8 @@ Just in time compilation \cite{aycock2003brief} is that a concept that dynamical
 
 The interpreters don't have to go through all the compilation steps before they can execute anything. They start translating the first line and execute it immediately.
 
-Because of this, an interpreter naturally seems to be a good choice to run something like JavaScript. It is important for a web developer to be able to start executing his code as fast as possible. That's why browsers have used interpreters to run JavaScript in the beginning.
-The problem with interpreters occurs when you want to run the same code more than once. Typically when you use a loop. In this case, the interpreter has to do the same translation over and over again.
+Because of this, an interpreter naturally seems to be an excellent choice to run something like JavaScript. It is essential for a web developer to be able to start executing his code as fast as possible. That's why browsers have used interpreters to run JavaScript in the beginning.
+The problem with interpreters occurs when you want to run the same code more than once. Typically when you use a loop. In this case, the interpreter has to do the exact translation over and over again.
 
 A compiler chooses the opposite compromises.
 
@@ -72,7 +72,7 @@ This helps speed things up. But as I said, a compiler can do much more. It can t
 
 However, if this code is really hot if it is executed really often, then it is worth taking the time to do more optimizations.
 
-Those warm and hot phases are what \cite{barrett2017virtual} are interested in. Indeed they record every performance for a lot of algorithms. They wrote an algorithm which identifies if those warm and hot phase is really speeding up the code. This warm and hot phase can help us with the classification of a performance difference.
+Those warm and hot phases are what \cite{barrett2017virtual} are interested in. Indeed they record every performance for a lot of algorithms. They wrote an algorithm which identifies if those warm and hot phase is really speeding up the code. This warm and hot phase can help us with the classification of a performance difference. The work done by \citep{barrett2017virtual} can help us difference in behaviour in rebench data.
 
 \cite{barrett2017virtual} used krun, which is an extreme benchmark runner which prepares the machine and the operating system for performing precise measurements of computer programs. It is kind of similar Rebench because it records some benchmarking data.
 
@@ -104,11 +104,11 @@ As with the analysis of time-series data, They had first mostly determined the o
     \label{fig:bench_node_flat}
 \end{figure}
 
-For example, the problem here from the previous techniques with rolling window is that it doesn't remove the first outliers because it ignores the 200 first measurements, but you could have some outliers in this part of the measurements. So I'm trying to find a better technique to remove those outliers.
+For example, the problem here from the previous techniques with rolling window is that it does not remove the first outliers because it ignores the 200 first measurements, but you could have some outliers in this part of the measurements. So I am trying to find a better technique to remove those outliers.
 
 Anomaly detection consists in highlighting data with different behaviour from the majority of the data. 
 Indeed, the detection can be performed in a supervised mode in case information on the normality of the data is available which is not the case here because it would mean to label the outlier inside the rebench data. In other words, any data in the learning base can be labelled as normal or abnormal.
-As for the detection in unsupervised mode, no information on the normality of the data is available which the case here and the case in the \cite{barrett2017virtual} paper and for the rebench data. 
+As for the detection in unsupervised mode, no information on the normality of the data is available which the case here and the case in the \cite{barrett2017virtual} paper and for the rebench data. This can be a future work if someone take time to identify outliers by hand or with a supervised script to learn something from those outliers.
 
 \subsubsection{Unsupervised techniques}
 The unsupervised approach is the most suitable for anomaly detection problems and benchmarks data. In this approach, the different algorithms try to distinguish aberrant observations by learning about the data set, without having the labels of the observations: there is no set of observations identified a priori as anomalies. It is therefore not necessary to have labelled data, and this simplifies the problem of preparing the data before learning and all the difficulty in constructing labels.
@@ -120,7 +120,7 @@ In the paper they apply the rolling window by removing all elements that are out
 \subsection{Overview of Changepoint detection algorithm}
 
 
-So first I used a package which allows me to do changepoint analysis which is called ruptures \cite{truong2020selective}, it works well, but after reading the warmup paper I prefer to use the algorithm from R "changepoint" \cite{killick2014changepoint} in order to reproduce the experiment.
+So first I used a package which allows me to do changepoint analysis which is called ruptures \cite{truong2020selective}, it works well. Still, after reading the warmup paper I prefer to use the algorithm from R "changepoint" \cite{killick2014changepoint} in order to reproduce the experiment.
 
 
 
@@ -279,7 +279,7 @@ During this project, I have reviewed and try some techniques to quantify the dif
 \subsection{Sleeping Barber problem}
 
 The program will have to be decomposed into two types of threads. On one side there will be the barber, represented by a single thread looping continuously to see if a customer is waiting, take care of him if necessary or go to bed. On the other side, there will be one thread per client, which will simulate the "physical" client. He will try to enter the shop, sit down and if he can, get a shave. And at the end leave the shop and disappear.
-While the program will have only one barber, there may be as many customers as there is memory on the computer. The client threads will, therefore, pile up, waiting for space to become available in the waiting room, and then the barber will take care of them. There are many threads that the computer allow or the user allows them to.
+While the program will have only one barber, there may be as many customers as there is memory on the computer. The client threads will, therefore, pile up, waiting for space to become available in the waiting room, and then the barber will take care of them. There are many threads that the computer allow or the user will enable them to.
 
 \subsubsection{ What does the barber do?}
 The thread symbolizing the barber will, therefore, be unique so one barber equal one thread. It will be started when the program is launched, before any customer, and will loop back on itself for all eternity.
@@ -421,7 +421,7 @@ The last result is the sum of each pair of the distance subsets are from each ot
 
 
 As expected, the only algorithm that seems to work is the directed Hausdorff algorithm because it is not influenced by the size of the dataset, indeed as the curve length increase the difference of the score increase. 
-I order to classify if a benchmark has changed between 2 commits, I have to found a threshold where, if the result of an algorithm would surpass this threshold it will mean that the benchmarks have changed from the previous commit. I order to get that threshold I labelled by hand all the benchmarks by hand. For 50 benchmarks by hand six have a real changed by human eyes and the rest have not changed between commit. Those 50 benchmarks could be corresponding to our training data. The threshold that seems to better classify is 20 because based on that, the result of the directed Hausdorff algorithm is that value that is better to separate the behaviour changed benchmarks and those who have not changed.
+I order to classify if a benchmark has changed between 2 commits, I have to found a threshold where, if the result of an algorithm would surpass this threshold it will mean that the benchmarks have changed from the previous commit. I order to get that threshold I labelled by hand all the benchmarks by hand. For 50 benchmarks by hand six have a real changed by human eyes and the rest have not changed between commit. Those 50 benchmarks could be corresponding to our training data. The threshold that seems to classify better is 20 because based on that, the result of the directed Hausdorff algorithm is that value that is better to separate the behaviour changed benchmarks and those who have not changed.
 I have put a threshold of 20 with the directed Hausdorff. When the directed Hausdorff value is more than 20 is interesting to look at the benchmark because it means that there is a significant difference between the two benchmarks.
 
 
@@ -435,21 +435,21 @@ For that, there is a script inside the corpus of this dissertation which is call
 \begin{figure}[]
     \centering
     \includegraphics[width=1\textwidth]{images/plot_SleepingBarber_4.069999999999936.png}
-    \caption{Benchmark 1 and 2 from sleeping Barber which are classified as having the same performance difference}
+    \caption{Benchmark 1 and 2 from sleeping Barber which are classified as having the same behaviour difference}
     \label{fig:bench_1_2_1}
 \end{figure}
 
 \begin{figure}[]
     \centering
     \includegraphics[width=1\textwidth]{images/plot_Philosophers_42.533000000000015.png}
-    \caption{Benchmark 1 and 2 from Philosopers algorithm which are classified as not having the same performance}
+    \caption{Benchmark 1 and 2 from Philosopers algorithm which are classified as not having the same behaviour}
     \label{fig:bench_1_2_2}
 \end{figure}
 
 \begin{figure}[]
     \centering
     \includegraphics[width=1\textwidth]{images/plot_Integrate_159.78600000000006.png}
-    \caption{Benchmark 1 and 2 from Integrate algorithm which are classified as not having the same performance}
+    \caption{Benchmark 1 and 2 from Integrate algorithm which are classified as not having the same behaviour}
     \label{fig:bench_1_2_3}
 \end{figure}
 
@@ -457,7 +457,7 @@ For that, there is a script inside the corpus of this dissertation which is call
 \begin{figure}[]
     \centering
     \includegraphics[width=1\textwidth]{images/plot_CD_100.56999999999994.png}
-    \caption{Benchmark 1 and 2 from CD algorithm which are classified as not having the same performance}
+    \caption{Benchmark 1 and 2 from CD algorithm which are classified as not having the same behaviour}
     \label{fig:bench_1_2_3}
 \end{figure}
 
