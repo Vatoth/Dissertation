@@ -29,20 +29,20 @@
 \section{Introduction}
 
 This dissertation is an approach of an evolution of the RebenchDB project, which is about trying to differentiate the result from two iterations of a Programmation language implementation. 
-ReBench is a tool to run and document benchmark experiments. Rebench is maintained by \cite{ReBench:2018}. In this dissertation, I'm using a side project, ReBenchDB, which is a project started in late 2019 by \cite{ReBench:2018}. The goal of ReBenchDb is to store and facilitate the analytics process with useful performance statistics of the data recorded by ReBench. Benchmark data produced from Rebench doesn't know to classify automatically if that benchmark has reached a steady-state nor if their behaviour differs from the previous iteration of the code. This dissertation will focus more on using the data provided by rebench. \\ 
-The first part is about applying the work done on warmup analysis by \cite{barrett2017virtual} in order to try the result of the algorithm and see if it could work to identify and compare two benchmarks from two different iterations of the Programmation language implementation.
+ReBench is a tool to run and document benchmark experiments. Rebench is maintained by \citep{ReBench:2018}. In this dissertation, I'm using a side project, ReBenchDB, which is a project started in late 2019 by \citep{ReBench:2018}. The goal of ReBenchDb is to store and facilitate the analytics process with useful performance statistics of the data recorded by ReBench. Benchmark data produced from Rebench doesn't know to classify automatically if that benchmark has reached a steady-state nor if their behaviour differs from the previous iteration of the code. This dissertation will focus more on using the data provided by rebench. \\ 
+The first part is about applying the work done on warmup analysis by \citep{barrett2017virtual} in order to try the result of the algorithm and see if it could work to identify and compare two benchmarks from two different iterations of the Programmation language implementation.
 The second part is to review and apply a different approach to the warmup paper to quantify the behaviour or difference from the benchmark. This part will use comparison algorithms between curve to quantify the difference between two benchmarks. This comparison will quantify if a benchmark as changed in term of behaviour. In the third part, this dissertation will explain more technically how the data is managed with a PostgreSQL and node.js.\\
 
 
 \section{Warmup analysis and warmup State classification (Context)}
 
-For the first expression of the need of Stefan Marr was to think about adding a feature, for his project RebenchDB. The project feature consists of trying to detect a performance difference between two versions of an algorithm. For that in this part of the dissertation I will briefly explain what is Just in Time Compilation and what consists the work done by \cite{barrett2017virtual}, then in the last part its the application in Python of the Paper with minor modifications of the algorithms that \cite{barrett2017virtual} present in their paper. We first need to define what is Just in time compilation and use and apply for the work already done by \cite{barrett2017virtual}
+For the first expression of the need of Stefan Marr was to think about adding a feature, for his project RebenchDB. The project feature consists of trying to detect a performance difference between two versions of an algorithm. For that in this part of the dissertation. Based of past reserch in the field of benchmarks i focused my work a study that classify the warmup state of JIT, I will briefly explain what is Just in Time Compilation and what consists the warmup phase and how the work that \citep{barrett2017virtual} works and how I can use it to perform identification for performance difference, then in the last part its the application in Python of the Paper with minor modifications of the algorithms that \citep{barrett2017virtual} present in their paper. We first need to define what is Just in time compilation and use and apply for the work already done by \citep{barrett2017virtual}
 
 \subsection{What is just in time compilation? }
 
-In order to understand the benchmark data and the work done by \cite{barrett2017virtual}, in need briefly recap what is just in time compilation.
+In order to understand the benchmark data and the work done by \citep{barrett2017virtual}, in need briefly recap what is just in time compilation.
 
-Just in time compilation \cite{aycock2003brief} is that a concept that dynamically adapts to the current software workload, compiling "hot" code, which is the most used code at a given time (which may represent the entire program, but often only certain parts of the program are processed by Just in time compilation).
+Just in time compilation \citep{aycock2003brief} is that a concept that dynamically adapts to the current software workload, compiling "hot" code, which is the most used code at a given time (which may represent the entire program, but often only certain parts of the program are processed by Just in time compilation).
 
 The interpreters don't have to go through all the compilation steps before they can execute anything. They start translating the first line and execute it immediately.
 
@@ -72,22 +72,22 @@ This helps speed things up. But as I said, a compiler can do much more. It can t
 
 However, if this code is really hot if it is executed really often, then it is worth taking the time to do more optimizations.
 
-Those warm and hot phases are what \cite{barrett2017virtual} are interested in. Indeed they record every performance for a lot of algorithms. They wrote an algorithm which identifies if those warm and hot phase is really speeding up the code. This warm and hot phase can help us with the classification of a performance difference. The work done by \citep{barrett2017virtual} can help us difference in behaviour in rebench data.
+Those warm and hot phases are what \citep{barrett2017virtual} are interested in. Indeed they record every performance for a lot of algorithms. They wrote an algorithm which identifies if those warm and hot phase is really speeding up the code. This warm and hot phase can help us with the classification of a performance difference. The work done by \citep{barrett2017virtual} can help us difference in behaviour in rebench data.
 
-\cite{barrett2017virtual} used krun, which is an extreme benchmark runner which prepares the machine and the operating system for performing precise measurements of computer programs. It is kind of similar Rebench because it records some benchmarking data.
+\citep{barrett2017virtual} used krun, which is an extreme benchmark runner which prepares the machine and the operating system for performing precise measurements of computer programs. It is kind of similar Rebench because it records some benchmarking data.
 
 \subsection{Background work on Warmup Phase Classification}
 
 .
-For this dissertation work, I implemented a study of \cite{barrett2017virtual} about characterizing warmup stages of popular virtual machines (VM), HHVM (PHP), Graal, HotSpot JVM (java), and others. 
+For this dissertation work, I implemented a study of \citep{barrett2017virtual} about characterizing warmup stages of popular virtual machines (VM), HHVM (PHP), Graal, HotSpot JVM (java), and others. 
 In the study, various benchmarks were repeatedly executed on each virtual machine to see when the JIT compilation happens and how it affects the performance.
 They have observed that JIT compilation usually increases the program performance; however, in very some cases, it might even lead to performance degradation or no steady-state for the programme. Moreover, I have observed the JIT compilation happens mostly during the first run of a program, which indicates that a "warmup phase".
-In \cite{barrett2017virtual} Papers for benchmark states classification, they used three steps.
+In \citep{barrett2017virtual} Papers for benchmark states classification, they used three steps.
 
 \begin{itemize}
     \item The first step is to clean outliers such as garbage collection or JIT compilation as seen above. A garbage collector is a computer subsystem for automatic memory management.  It is responsible for recycling previously allocated and unused memory.  
-    \item The second step after cleaning those outliers from the data is to applied a change-point algorithm \cite{killick2014changepoint}
-    \item The third step After getting the breakpoints from the change-points algorithm is to have each segment of the experiments and pass them to the classification algorithm that \cite{barrett2017virtual} have made which will classify the experiment with four class (warmup, flat, slow down or no steady-state).
+    \item The second step after cleaning those outliers from the data is to applied a change-point algorithm \citep{killick2014changepoint}
+    \item The third step After getting the breakpoints from the change-points algorithm is to have each segment of the experiments and pass them to the classification algorithm that \citep{barrett2017virtual} have made which will classify the experiment with four class (warmup, flat, slow down or no steady-state).
 \end{itemize}
 
 
@@ -95,7 +95,7 @@ In \cite{barrett2017virtual} Papers for benchmark states classification, they us
 
 \subsection{Clean outliers}
 
-As with the analysis of time-series data, They had first mostly determined the outliers ( much larger / pretty much smaller than close neighbours). In the paper \cite{barrett2017virtual} they said that this data, can particularly be compile-time of JIT, Garbage collection or basically other processes that specifically do specifically interfere with the benchmarks in a subtle way. I applied the same techniques of \cite{barrett2017virtual} to get the same results which, for the most part, is a rolling window to remove the outliers in the benchmarks like the garbage collection in an actually major way.
+In time-series data analysis, the detection of anomalies is the identification of elements, events or rare observations that raise suspicions by differing significantly from the majority of other data. They had first mostly determined the outliers ( much larger / pretty much smaller than close neighbours). In the paper \citep{barrett2017virtual} they said that this data, can particularly be compile-time of JIT, Garbage collection or basically other processes that specifically do specifically interfere with the benchmarks in a subtle way. I applied the same techniques of \citep{barrett2017virtual} to get the same results which, for the most part, is a rolling window to remove the outliers in the benchmarks like the garbage collection in an actually major way.
 
 \begin{figure}[h!]
     \centering
@@ -108,28 +108,22 @@ For example, the problem here from the previous techniques with rolling window i
 
 Anomaly detection consists in highlighting data with different behaviour from the majority of the data. 
 Indeed, the detection can be performed in a supervised mode in case information on the normality of the data is available which is not the case here because it would mean to label the outlier inside the rebench data. In other words, any data in the learning base can be labelled as normal or abnormal.
-As for the detection in unsupervised mode, no information on the normality of the data is available which the case here and the case in the \cite{barrett2017virtual} paper and for the rebench data. This can be a future work if someone take time to identify outliers by hand or with a supervised script to learn something from those outliers.
+As for the detection in unsupervised mode, no information on the normality of the data is available which the case here and the case in the \citep{barrett2017virtual} paper and for the rebench data. This can be a future work if someone take time to identify outliers by hand or with a supervised script to learn something from those outliers.
 
 \subsubsection{Unsupervised techniques}
-The unsupervised approach is the most suitable for anomaly detection problems and benchmarks data. In this approach, the different algorithms try to distinguish aberrant observations by learning about the data set, without having the labels of the observations: there is no set of observations identified a priori as anomalies. It is therefore not necessary to have labelled data, and this simplifies the problem of preparing the data before learning and all the difficulty in constructing labels.
+The unsupervised approach is the most suitable for anomaly detection problems and benchmarks data. In this approach, the different algorithms try to distinguish bad observations by learning about the data set, without having the labels of the observations: there is no set of observations identified a priori as anomalies. It is therefore not necessary to have labelled data, and this simplifies the problem of preparing the data before learning and all the difficulty in constructing labels.
 
 In the paper they apply the rolling window by removing all elements that are outside the mean by 15\% and 85\% They ignore the 200 measurements because it would remove too much interesting data about warmup which represent 10\% of the size of the whole benchmark in their paper. There was some problem with outlier removing because in the rebench data there was clearly outlier that past the warmup phase should be removed, so I reduced the ignore phase to 5\% (100 first measurements for a benchmark of 2000 measurements which are ignored).
 
 
-
-\subsection{Overview of Changepoint detection algorithm}
-
-
-So first I used a package which allows me to do changepoint analysis which is called ruptures \cite{truong2020selective}, it works well. Still, after reading the warmup paper I prefer to use the algorithm from R "changepoint" \cite{killick2014changepoint} in order to reproduce the experiment.
-
-
-
 \subsection{Changepoint Detection}
-In statistical analysis, the changepoint detection problem is a regression problem to estimate the times at which a signal exhibits changes in the distribution. Classically, changepoint detection is performed for a signal with changes in the mean. More generally, changepoint detection is performed for a signal with changes in the distribution (for example, in the mean and variance). \\
+In statistical analysis,  the changepoint detection problem is a regression problem to estimate the times at which a signal exhibits changes in the distribution. Classically, changepoint detection is performed for a signal with changes in the mean. More generally, changepoint detection is performed for a signal with changes in the distribution (for example, in the mean and variance). \\
 
 Changepoint detection can be applied to a sound signal of a program for which we wish to estimate the moments when situations change, to the detection of computer attacks, or to quality control, here for the rebench data it helps to classify behaviour in warmup analysis. \\
 
 This next will deals with the problem of detecting changepoint retrospectively (known as offline) when all the signal data are available. This context is different from a real-time detection (online) where the signal data arrive on the fly it could be interesting to classify on the fly after reaching and classifying a stabilization of a benchmark and stoping recording the benchmark data in order to save time, but online detection is less able to detect precisely the moment of rupture.
+
+So first I used a package which allows me to do changepoint analysis which is called ruptures \citep{truong2020selective}, it works well. Still, after reading the warmup paper I prefer to use the algorithm from R "changepoint" \citep{killick2014changepoint} in order to reproduce the experiment.
 
 \subsection{Offline detection Parametric and Non Parametric}
  
@@ -155,7 +149,7 @@ There is 3 type of detection of Changepoint.
 
 Changepoint in mean, Changepoint in variance, and Changepoint mean or variance.
 
-In the paper \cite{barrett2017virtual} They used mean and variance detection with the changepoint algorithm.
+In the paper \citep{barrett2017virtual} They used mean and variance detection with the changepoint algorithm.
 
 
 
@@ -183,7 +177,7 @@ the \ref{fig:bench_somns_flat} series by changes in mean and variance.
 
 Based on these models, here is the kind of segmentation that could be proposed:
 
-The above results are actually obtained using the changepoint package from \cite{killick2014changepoint}.
+The above results are actually obtained using the changepoint package from \citep{killick2014changepoint}.
 
 In the warmup paper, they discussed three different functions:
 
@@ -196,7 +190,7 @@ The nature of the algorithm used to detect "optimal" breakpoints...
 the type of test used to locate the changepoint (one can either assume that the residual distribution of the variables is Gaussian, or one can not make an assumption of distribution and use a non-parametric test)
 the type and extent of the penalty applied in order to limit over-segmentation.
 
-These aspects are discussed in \cite{killick2014changepoint}.
+These aspects are discussed in \citep{killick2014changepoint}.
 
 \subsection{Effect of parameterization}
 
@@ -206,19 +200,19 @@ To choose the segmentation algorithm and other associated parameters, we will re
 
 Theoretical criteria (which model is best suited to the data? one with constant variance, one where the residuals are Gaussian, one that would account for segments of highly variable lengths, etc.).
 
-Empirical criteria (I choose the method that gives the most "usable" results on real the warmup paper, and the correct results on the data from rebench data). This is what I used because I assume that the data and the result of the classification from \cite{barrett2017virtual} were verified and are correct.
+Empirical criteria (I choose the method that gives the most "usable" results on real the warmup paper, and the correct results on the data from rebench data). This is what I used because I assume that the data and the result of the classification from \citep{barrett2017virtual} were verified and are correct.
 
 Calculation criteria (the method must be computationally applicable for data of a certain size).
 
-Obviously, determining which method is best using multiple criteria of these three types is difficult. Nevertheless, it is possible to discuss it by carrying out the same type of study as \cite{leviandier2012comparison}. This could be a future work to find the best parameters for changepoint analysis for rebench data and/or \cite{barrett2017virtual} paper but for this experiment, I will stick to the parameters they used in the warmup paper.
+Obviously, determining which method is best using multiple criteria of these three types is difficult. Nevertheless, it is possible to discuss it by carrying out the same type of study as \citep{leviandier2012comparison}. This could be a future work to find the best parameters for changepoint analysis for rebench data and/or \citep{barrett2017virtual} paper but for this experiment, I will stick to the parameters they used in the warmup paper.
 
 \subsection{Classification}
 
 
 There was some problem with the classification I adapted the algorithm which works now depending on the size of the benchmarks.
-The classify function from \cite{barrett2017virtual} takes as parameters the measurements from rebench and the length of the measurements it is useful because otherwise, the STEADY\_STATE\_LEN would stay to 500 which is not suitable when the length of the measures are under 500 for example. After all, it would mean that the steady-state length would be more than the size of measurements which is not possible.
+The classify function from \citep{barrett2017virtual} takes as parameters the measurements from rebench and the length of the measurements it is useful because otherwise, the STEADY\_STATE\_LEN would stay to 500 which is not suitable when the length of the measures are under 500 for example. After all, it would mean that the steady-state length would be more than the size of measurements which is not possible.
 
-This code bellow is majorly from the \cite{barrett2017virtual} but is adapted in Python and vary the classification dynamically depending on the size of the whole benchmarks.
+This code bellow is majorly from the \citep{barrett2017virtual} but is adapted in Python and vary the classification dynamically depending on the size of the whole benchmarks.
 \begin{python}[h!]
 
 # From paper Virtual Machine Warmup Blows Hot and Cold
@@ -274,7 +268,7 @@ The main problem to identify performance difference with these techniques is tha
 
 \section{ How to detect the change between benchmarks? Overview of the method to quantify the difference between curve}
 
-During this project, I have reviewed and try some techniques to quantify the difference between benchmarks and report if Changement of behaviour as occurs. During this dissertation, I prefer to pick one benchmark problem, which is the sleeping barber algorithm \cite{reynolds2002linda}, which is a sharing resources problem in multi-tasking. The next subsection will be about explaining what is the sleeping algorithm and explaining why I am getting that kind of plot.
+During this project, I have reviewed and try some techniques to quantify the difference between benchmarks and report if Changement of behaviour as occurs. During this dissertation, I prefer to pick one benchmark problem, which is the sleeping barber algorithm \citep{reynolds2002linda}, which is a sharing resources problem in multi-tasking. The next subsection will be about explaining what is the sleeping algorithm and explaining why I am getting that kind of plot.
 
 \subsection{Sleeping Barber problem}
 
@@ -334,21 +328,21 @@ a curve, for example. The desire to remain in the space of the image requires th
 
 \subsubsection{Area method}
 
-First, I have used Area \cite{jekel2019similarity} method to quantify the difference between the curve, this an algorithm for calculating the area between two curves in 2D space.
-Strictly speaking, the expression area under the curve refers to the area A of the domain delimited by a curve (represented in an x-y diagram) and three straight lines (the x-axis and two vertical lines with abscissa a and b). If the curve has the equation $y=f(x) y=f(x)$, the area is $A=\int _{a}^{b}f(x)\, {d} x$. This area is a true area (e.g. milliseconds for benchmarks) only if the function f has only positive (or zero) values over the interval [a,b] and if both the abscissa and the ordinate are lengths (with the same choice of unit, e.g. milliseconds for benchmarks).
+First, I have used Area \citep{jekel2019similarity} method to quantify the difference between the curve, this an algorithm for calculating the area between two curves in 2D space.\\
+Strictly speaking, the expression area under the curve refers to the area A of the domain delimited by a curve (represented in an x-y diagram) and three straight lines (the x-axis and two vertical lines with abscissa a and b). If the curve has the equation $y=f(x)$, the area is $A=\int _{a}^{b}f(x)\, {d} x$. This area is a true area (e.g. milliseconds for benchmarks) only if the function f has only positive (or zero) values over the interval [a,b] and if both the abscissa and the ordinate are lengths (with the same choice of unit, e.g. milliseconds for benchmarks).\\
 For the purpose of detecting if the behaviour has changed between two benchmarks, it is not interesting because it quantifies the area a whole and area can be equal but not their behaviour.
 
 \subsubsection{Curve Length Measure}
 
 
-Let consider in the plane a curve \cite{moran1966measuring} which is the graph of a function f defined on the interval [a, b]. For example, the algorithm will calculate the length of this curve. To do this, we will approximate the curve by a broken line formed of n segments and calculate the distance of this fractured line. We will then obtain the exact length of the curve by a limit process.
+Let consider in the plane a curve \citep{moran1966measuring} which is the graph of a function f defined on the interval [a, b]. For example, the algorithm will calculate the length of this curve. To do this, we will approximate the curve by a broken line formed of n segments and calculate the distance of this fractured line. We will then obtain the exact length of the curve by a limit process.
 Theoretically, the length of the curve representative of a function f over an interval [a; b] (on which it is differentiable) is given by $\int_{a}^{b} \sqrt{1+f^{\prime}(x)^{2}} d x$
 This makes it possible to obtain the exact value compared to the initial problem as well as an approximate value and appreciate the accuracy of the algorithm according to the value of n. So we are sure that the value is an exact value and not an approximation compared from the Area method, for example.
 
 The curve length measure could work to differentiate the algorithm that has a lot of variance difference across the benchmark. This is not always the case because sometimes both benchmarks can I have a kind of flat curve, or can I have no steady state.
-The application of the curve length measure used in this dissertation is from \cite{jekel2019similarity}
+The application of the curve length measure used in this dissertation is from \citep{jekel2019similarity}
 \subsubsection{Hausdorff Distance }
-The Hausdorff distance \cite{belogay1997calculating} is used to account for the maximum deviation between two polylines (benchmarks 1, benchmarks 1). By definition, two polylines benchmarks one and benchmarks 2 are at a Hausdorff distance (DH) from each other of less than d units, if each point of L1 is within d units of at least one point of benchmarks 2, and if, reciprocally, each point of benchmarks 2 is less than d units away from each other by at least one point of benchmarks 1.
+The Hausdorff distance \citep{belogay1997calculating} is used to account for the maximum deviation between two polylines (benchmarks 1, benchmarks 1). By definition, two polylines benchmarks one and benchmarks 2 are at a Hausdorff distance (DH) from each other of less than d units, if each point of L1 is within d units of at least one point of benchmarks 2, and if, reciprocally, each point of benchmarks 2 is less than d units away from each other by at least one point of benchmarks 1.
 
 The Hausdorff distance is defined as the greater of the two following components :
 
@@ -388,7 +382,7 @@ In short, the DTW algorithm consists of three steps:
 The effectiveness of DTW was not worth because sometimes for very long benchmarks the algorithm needed a lot of memories in fact, I could not run it in my computer for 5000 measurements because it took more than 8 gigabytes.
 Also from the results, it needed data preparation to be run correctly by with no good result as the Hausdorff distance \ref{result}
 
-The application used in this dissertation is a work done by \cite{salvador2007toward}
+The application used in this dissertation is a work done by \citep{salvador2007toward}
 
 \subsection{ interpretation of results after running the algorithms}
 
@@ -457,7 +451,7 @@ For that, there is a script inside the corpus of this dissertation which is call
 \begin{figure}[]
     \centering
     \includegraphics[width=1\textwidth]{images/plot_CD_100.56999999999994.png}
-    \caption{Benchmark 1 and 2 from CD algorithm which are classified as not having the same behaviour}
+    \caption{Benchmark 1 and 2 from CD algorithm which are classified ashaving the same behaviour difference}
     \label{fig:bench_1_2_3}
 \end{figure}
 
@@ -490,7 +484,7 @@ This section will talk about more about the engineering process for rebench data
 
 \subsection{Building a REST API around the database structure}
 
-First thing I did was take the data collected, which is produced by rebench \cite{ReBench:2018}. The data is in Postgres SQL format, which is a language for communicating with a database. This computer language is notably very much used by web developers to describe with the data of a web site (Here a REST API).
+First thing I did was take the data collected, which is produced by rebench \citep{ReBench:2018}. The data is in Postgres SQL format, which is a language for communicating with a database. This computer language is notably very much used by web developers to describe with the data of a web site (Here a REST API).
 
 To import the backup of the data produced by Rebench I am using this command which will import only the data and not the structure which is created by the node.js server.
 
@@ -498,7 +492,7 @@ To import the backup of the data produced by Rebench I am using this command whi
 pg_dump --verbose -Fc -U postgres -h 0.0.0.0 -p 5432  -a --dbname=postgres > data.dump
 \end{python}
 
-The structure was designed by \cite{ReBench:2018}, but I include a map of the structure to see it more clearly.
+The structure was designed by \citep{ReBench:2018}, but I include a map of the structure to see it more clearly.
 
 
 \begin{figure}[h!]
@@ -522,7 +516,7 @@ After that, I needed to manipulate them, so I build a REST API which is a style 
 Because of the data is created by rebench is from a PostgreSQL database the goal is to add a PostgreSQL connection so that we can retrieve information from a database and display that information in the application as a simple list.
 We will use PostgresqlQL as the database. For this, we will use an ORM (Object Relational Mapping). There are several ORM node.js such as Sequelize, type ORM and mongoose. The most suitable ORM in our case is sequelize. Sequelize allows the use of a database type: MySQL, Postgres, SQLite and Microsoft SQL Server but for this project, we will stick to Postgresql.
 
-To communicate with the database, I'm using an ORM (Sequelize) between the database language SQL and the javascript side \cite{pereira2016working}. ORM or Object Relation Mapping is a mapping process between objects and relational database systems. An ORM (here Sequelize) acts as an interface between two systems (Postgresql and The node.js Server). ORMs offer to the developers' basic benefits, such as reducing time and effort and focusing on business logic. The code is robust instead of redundant. ORM helps manage queries across multiple tables efficiently. Finally, an ORM (such as Sequelize) is able to connect to different databases (which is useful when switching from one database to another).
+To communicate with the database, I'm using an ORM (Sequelize) between the database language SQL and the javascript side \citep{pereira2016working}. ORM or Object Relation Mapping is a mapping process between objects and relational database systems. An ORM (here Sequelize) acts as an interface between two systems (Postgresql and The node.js Server). ORMs offer to the developers' basic benefits, such as reducing time and effort and focusing on business logic. The code is robust instead of redundant. ORM helps manage queries across multiple tables efficiently. Finally, an ORM (such as Sequelize) is able to connect to different databases (which is useful when switching from one database to another).
 
 
 
@@ -591,7 +585,7 @@ You can see the docker-compose-.yml file in the Github repository \url{https://g
 \section{Conclusion}
 
 
-This master thesis work was mainly on the analysis of Rebench data, and The goal was to identify the performance difference in the data produced by Rebench Data. First, I have applied from \cite{barrett2017virtual} warmup Paper which was not enough to identify performance differences because it only characterized the behaviour and lose a lot of information by oversimplifying the data. There also an application of outliers removal (Garbage collection...) in benchmarks data that have been reuse for all data preparation before the algorithms.  Then this dissertation was more focus on reviewing curve comparison algorithm and applying them. The conclusion of this dissertation was that by using the Hausdorff to quantify the difference between two curves, we are able to identify if a benchmark as changed of behaviour between two iterations of the code.
+This master thesis work was mainly on the analysis of Rebench data, and The goal was to identify the performance difference in the data produced by Rebench Data. First, I have applied from \citep{barrett2017virtual} warmup Paper which was not enough to identify performance differences because it only characterized the behaviour and lose a lot of information by oversimplifying the data. There also an application of outliers removal (Garbage collection...) in benchmarks data that have been reuse for all data preparation before the algorithms.  Then this dissertation was more focus on reviewing curve comparison algorithm and applying them. The conclusion of this dissertation was that by using the Hausdorff to quantify the difference between two curves, we are able to identify if a benchmark as changed of behaviour between two iterations of the code.
 
 \section{Future Work}
 
