@@ -29,7 +29,7 @@
 \section{Introduction}
 
 This dissertation is an approach of an evolution of the RebenchDB project, which is about trying to differentiate the result from two iterations of a Programmation language implementation. 
-ReBench is a tool to run and document benchmark experiments. Rebench is maintained by \citep{ReBench:2018}. In this dissertation, I'm using a side project, ReBenchDB, which is a project started in late 2019 by \citep{ReBench:2018}. The goal of ReBenchDb is to store and facilitate the analytics process with useful performance statistics of the data recorded by ReBench. Benchmark data produced from Rebench doesn't know to classify automatically if that benchmark has reached a steady-state nor if their behaviour differs from the previous iteration of the code. This dissertation will focus more on using the data provided by rebench. \\ 
+ReBench is a tool to run and document benchmark experiments. Rebench is maintained by Stefan\citeauthor{ReBench:2018}. In this dissertation, I'm using a side project, ReBenchDB, which is a project started in late 2019 by \citeauthor{ReBench:2018}. The goal of ReBenchDb is to store and facilitate the analytics process with useful performance statistics of the data recorded by ReBench. Benchmark data produced from Rebench doesn't know to classify automatically if that benchmark has reached a steady-state nor if their behaviour differs from the previous iteration of the code. This dissertation will focus more on using the data provided by rebench. \\ 
 The first part is about applying the work done on warmup analysis by \citep{barrett2017virtual} in order to try the result of the algorithm and see if it could work to identify and compare two benchmarks from two different iterations of the Programmation language implementation.
 The second part is to review and apply a different approach to the warmup paper to quantify the behaviour or difference from the benchmark. This part will use comparison algorithms between curve to quantify the difference between two benchmarks. This comparison will quantify if a benchmark as changed in term of behaviour. In the third part, this dissertation will explain more technically how the data is managed with a PostgreSQL and node.js.\\
 
@@ -38,9 +38,15 @@ The second part is to review and apply a different approach to the warmup paper 
 
 For the first expression of the need of Stefan Marr was to think about adding a feature, for his project RebenchDB. The project feature consists of trying to detect a performance difference between two versions of an algorithm. For that in this part of the dissertation. Based of past reserch in the field of benchmarks i focused my work a study that classify the warmup state of JIT, I will briefly explain what is Just in Time Compilation and what consists the warmup phase and how the work that \citep{barrett2017virtual} works and how I can use it to perform identification for performance difference, then in the last part its the application in Python of the Paper with minor modifications of the algorithms that \citep{barrett2017virtual} present in their paper. We first need to define what is Just in time compilation and use and apply for the work already done by \citep{barrett2017virtual}
 
+\subsection{Rebench}
+
+Rebench is tool developped by stefan marr in order to run and document benchmarks reproductability. The data that this dissertation will relate is data recorded by Rebench. In the data produced by rebench there is a lot of meta data for example all the machine meta for benchmarking reproducability. I will focus more on the measurements made by RebenchDB and use the commit in the meta which those measurements relate to. The data that i used is from benchmarking that language implementations for various computing algorithms. The project rebench itself does not store data its the side project that act like a wrapper arround a SQL (Postgresql) database.
+
+
 \subsection{What is just in time compilation? }
 
-In order to understand the benchmark data and the work done by \citep{barrett2017virtual}, in need briefly recap what is just in time compilation.
+
+In order to understand the benchmark data and classification of warmup phase that relate to the work done by \citep{barrett2017virtual}, in need briefly recap what is just in time compilation.
 
 Just in time compilation \citep{aycock2003brief} is that a concept that dynamically adapts to the current software workload, compiling "hot" code, which is the most used code at a given time (which may represent the entire program, but often only certain parts of the program are processed by Just in time compilation).
 
@@ -64,22 +70,19 @@ If the same lines of code are executed a few times, this piece of code is consid
 
 When a function becomes lukewarm, the JIT will send it to the compiler and will store the result of the compilation.
 
-The basic compiler (BC for Baseline Compiler)
-
 Each line of code is compiled as a "chunk". Extracts are indexed by line number and by variable type. If the profiler notices that the same code with the same variable types is executed again, it will simply use the compiled stub.
 
-This helps speed things up. But as I said, a compiler can do much more. It can take the time to figure out the most efficient way to do certain things to make optimizations. The basic compiler will do some of these optimizations. This should not take too much time, because it doesn't want to freeze the execution for too long.
+This helps speed things up. But as I said, a compiler can do much more. It can take the time to figure out the most efficient way to do certain things to make optimizations. The basic compiler will do some of these optimisations. This should not take too much time, because it doesn't want to freeze the execution for too long.
 
 However, if this code is really hot if it is executed really often, then it is worth taking the time to do more optimizations.
 
 Those warm and hot phases are what \citep{barrett2017virtual} are interested in. Indeed they record every performance for a lot of algorithms. They wrote an algorithm which identifies if those warm and hot phase is really speeding up the code. This warm and hot phase can help us with the classification of a performance difference. The work done by \citep{barrett2017virtual} can help us difference in behaviour in rebench data.
 
-\citep{barrett2017virtual} used krun, which is an extreme benchmark runner which prepares the machine and the operating system for performing precise measurements of computer programs. It is kind of similar Rebench because it records some benchmarking data.
+\citep{barrett2017virtual} used krun, which is an extreme benchmark runner which prepares the machine and the operating system for performing precise measurements of computer programs. It is kind of similar Rebench because it records some benchmarking data. But krun is more specified about studying those warpmup phase.
 
 \subsection{Background work on Warmup Phase Classification}
 
-.
-For this dissertation work, I implemented a study of \citep{barrett2017virtual} about characterizing warmup stages of popular virtual machines (VM), HHVM (PHP), Graal, HotSpot JVM (java), and others. 
+Warmup  I implemented a study of \citep{barrett2017virtual} about characterizing warmup stages of popular virtual machines (VM), HHVM (PHP), Graal, HotSpot JVM (java), and others. 
 In the study, various benchmarks were repeatedly executed on each virtual machine to see when the JIT compilation happens and how it affects the performance.
 They have observed that JIT compilation usually increases the program performance; however, in very some cases, it might even lead to performance degradation or no steady-state for the programme. Moreover, I have observed the JIT compilation happens mostly during the first run of a program, which indicates that a "warmup phase".
 In \citep{barrett2017virtual} Papers for benchmark states classification, they used three steps.
@@ -104,8 +107,7 @@ In time-series data analysis, the detection of anomalies is the identification o
     \label{fig:bench_node_flat}
 \end{figure}
 
-For example, the problem here from the previous techniques with rolling window is that it does not remove the first outliers because it ignores the 200 first measurements, but you could have some outliers in this part of the measurements. So I am trying to find a better technique to remove those outliers.
-
+For example, the problem here from the previous techniques with rolling window is that it does not remove the first outliers because it ignores the 200 first measurements, but you could have some outliers in this part of the measurements. So it can be in the future a future work to find better techniques to clean outliers from rebench data other that removing with a rolling windows which doesn't remove outliers.
 Anomaly detection consists in highlighting data with different behaviour from the majority of the data. 
 Indeed, the detection can be performed in a supervised mode in case information on the normality of the data is available which is not the case here because it would mean to label the outlier inside the rebench data. In other words, any data in the learning base can be labelled as normal or abnormal.
 As for the detection in unsupervised mode, no information on the normality of the data is available which the case here and the case in the \citep{barrett2017virtual} paper and for the rebench data. This can be a future work if someone take time to identify outliers by hand or with a supervised script to learn something from those outliers.
@@ -123,33 +125,7 @@ Changepoint detection can be applied to a sound signal of a program for which we
 
 This next will deals with the problem of detecting changepoint retrospectively (known as offline) when all the signal data are available. This context is different from a real-time detection (online) where the signal data arrive on the fly it could be interesting to classify on the fly after reaching and classifying a stabilization of a benchmark and stoping recording the benchmark data in order to save time, but online detection is less able to detect precisely the moment of rupture.
 
-So first I used a package which allows me to do changepoint analysis which is called ruptures \citep{truong2020selective}, it works well. Still, after reading the warmup paper I prefer to use the algorithm from R "changepoint" \citep{killick2014changepoint} in order to reproduce the experiment.
-
-\subsection{Offline detection Parametric and Non Parametric}
- 
- 
-There two big families of the offline detection algorithm.
-
-\subsubsection{Parametric}
-
-Advantages: speed of calculation, ease of interpretation and prediction,
-good speed of convergence, the possibility of validation;
-Disadvantages: a priori choice of known functions (for example the degree of polynomial), adapted to a limited class of tendencies.
-
-\subsubsection{Non-parametric}
-
-\begin{itemize}
-    \item Advantages: adaptability, not a priori on the type of trend;
-    \item Disadvantages: limits in interpretation, validation and prediction, choice of window / smoothing parameters.
-\end{itemize}
-
-Of course, there are very different ways of proceeding to analyze this type of signal. One of the most "intuitive" is to cut the series into "homogeneous" segments. This notion of homogeneity can cover, for example, homogeneity in mean, or homogeneity in variance (or homogeneity in mean-variance!).
-
-There is 3 type of detection of Changepoint.
-
-Changepoint in mean, Changepoint in variance, and Changepoint mean or variance.
-
-In the paper \citep{barrett2017virtual} They used mean and variance detection with the changepoint algorithm.
+So first I used a package which allows me to do changepoint analysis which is called ruptures \citep{truong2020selective}, it works well but during the comparaison of my result and the result from the warmup paper it appears I doesn't get the same result from the experiement. So in order to get the same result, after reading the warmup paper I prefered to use the algorithm from R "changepoint" \citep{killick2014changepoint} in order to reproduce the experiment correctly. The implementation is a wrapper around the R package using python. 
 
 
 
@@ -254,8 +230,14 @@ def classify(segs, n_values):
     return label
 \end{python}
 
+After implementating the algorithm, I managed to write a little the script to compare two commit and see if the result of classification is good enough to be able to differentiate benchmark behaviour.
+I runned is some issues
+
+
 You can see the result of this algorithm in the zip file (the corpus of the dissertation) it produced an image with the outliers and the classification given inside the filename.
 The major problem to differentiate the behaviour of benchmark of this technique is that it removes a lot of information you can have totally the same behaviour from the classification for example 2 benchmarks classify as "warmup", but it will not reflect the reality because they can be classified as warmup but the curve means can be much higher compare to other which need to be considered. So I have to find other technique, and for that, I used some other techniques already used on the industry for compared directly curve by quantifying them.
+
+
 
 
 
@@ -268,7 +250,7 @@ The main problem to identify performance difference with these techniques is tha
 
 \section{ How to detect the change between benchmarks? Overview of the method to quantify the difference between curve}
 
-During this project, I have reviewed and try some techniques to quantify the difference between benchmarks and report if Changement of behaviour as occurs. During this dissertation, I prefer to pick one benchmark problem, which is the sleeping barber algorithm \citep{reynolds2002linda}, which is a sharing resources problem in multi-tasking. The next subsection will be about explaining what is the sleeping algorithm and explaining why I am getting that kind of plot.
+As you have seen the classification is not sufficient to identify performance difference between benchmarks, So i have to try other techniques. I have reviewed and try some techniques to quantify the difference between benchmarks and report if Changement of behaviour as occurs. During this dissertation, I prefer to pick one benchmark problem, which is the sleeping barber algorithm \citep{reynolds2002linda}, which is a sharing resources problem in multi-tasking. The next subsection will be about explaining what is the sleeping algorithm and explaining why I am getting that kind of plot.
 
 \subsection{Sleeping Barber problem}
 
@@ -276,7 +258,7 @@ The program will have to be decomposed into two types of threads. On one side th
 While the program will have only one barber, there may be as many customers as there is memory on the computer. The client threads will, therefore, pile up, waiting for space to become available in the waiting room, and then the barber will take care of them. There are many threads that the computer allow or the user will enable them to.
 
 \subsubsection{ What does the barber do?}
-The thread symbolizing the barber will, therefore, be unique so one barber equal one thread. It will be started when the program is launched, before any customer, and will loop back on itself for all eternity.
+The thread symbolising the barber will, therefore, be unique so one barber equal one thread. It will be started when the program is launched, before any customer, and will loop back on itself for all eternity.
 Here's what our barber will spend his life doing:
 
 \begin{itemize}
@@ -341,31 +323,11 @@ This makes it possible to obtain the exact value compared to the initial problem
 
 The curve length measure could work to differentiate the algorithm that has a lot of variance difference across the benchmark. This is not always the case because sometimes both benchmarks can I have a kind of flat curve, or can I have no steady state.
 The application of the curve length measure used in this dissertation is from \citep{jekel2019similarity}
-\subsubsection{Hausdorff Distance }
-The Hausdorff distance \citep{belogay1997calculating} is used to account for the maximum deviation between two polylines (benchmarks 1, benchmarks 1). By definition, two polylines benchmarks one and benchmarks 2 are at a Hausdorff distance (DH) from each other of less than d units, if each point of L1 is within d units of at least one point of benchmarks 2, and if, reciprocally, each point of benchmarks 2 is less than d units away from each other by at least one point of benchmarks 1.
-
-The Hausdorff distance is defined as the greater of the two following components :
-
-\begin{itemize}
-    \item The first distance which is the largest value of the non-symmetrical distance from benchmarks 1 to benchmarks 2,
-    \item The second distance which is the largest value of the non-symmetrical distance from benchmarks 2 to benchmarks 1.
-\end{itemize}
-
-
-For this project I'm using the implementation of the library scipy which is implemented and documented here \url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.directed_hausdorff.html}
-
-From this principle and from the scipy documentation, we are taking the two distance produced by the algorithm then taking the minimum to avoid false positive.
-
-This distance has the advantage of providing two measurements. Right-of-way lines can thus be compared using the component starting from the shortest line. On the other hand, the Hausdorff distance, with the disadvantage of calculating the
-distance on the nearest pairs of points and not on homologous points. Homologous points are points that visually correspond to each other. For example, the point in benchmark 2 used to calculate distance one is not the Intuitively corresponding to the point of benchmark 2; it is simply the closest point. The distance from Hausdorff considers polylines as simple sets of dots unordered. This problem is particularly important for very sinuous or with loops. Small distances can then be sent back to different lines. Similarly, pairs of dots cannot be considered to be matches. Nevertheless, this particularity has the advantage of reducing calculation time: the algorithmic complexity of this algorithm is linear. 
-
-
-This method seems to be working better because there is no need for the dataset to know if the first measurement of the first sequence must match the first measurement of the other sequence and that the last measurement of the first sequence must match the last measurement of the other sequence (but it must not be its only match).
 
 
 \subsubsection{DTW}
 
- The DTW finds the best match between a reference (the score) and a signal (the interpretation) by calculating a difference between vectors of the characteristics for each of these signals. The comparison algorithms of changes are based on the exact correspondence between the reference and the signal and do not take into account, among other things, the imprecision of the pitch estimation due to chords or errors of the height detection algorithm. In addition, the DTW can be used to align continuous multi-dimensional characteristics, for example, results from a signal analysis, which allows the partition alignment to be based on parameters such as the number of partitions, the size of the partition, the number of partitions, the number of partitions to be aligned, the number of partitions to be aligned, the number of partitions to be aligned, the number of partitions to be aligned and the number of partitions to be aligned.
+ The DTW finds the best match between a reference (the score) and a signal (the interpretation) by calculating a difference between vectors of the characteristics for each of these signals. The comparison algorithms of changes are based on the exact correspondence between the reference and the signal and do not take into account, among other things, the imprecision of the pitch estimation due to chords or errors of the height detection algorithm. In addition, the DTW can be used to align continuous multi-dimensional characteristics, for example, results from a signal analysis, which allows the partition alignment to be based on parameters such as the number of partitions, the size of the partition.
 The system does not require prior segmentation of the benchmark measurements and does not require prior segmentation of the
 signal.
 In short, the DTW algorithm consists of three steps:
@@ -384,9 +346,32 @@ Also from the results, it needed data preparation to be run correctly by with no
 
 The application used in this dissertation is a work done by \citep{salvador2007toward}
 
-\subsection{ interpretation of results after running the algorithms}
+\subsubsection{Hausdorff Distance }
+The Hausdorff distance \citep{belogay1997calculating} is used to account for the maximum deviation between two polylines (benchmarks one, benchmarks one). By definition, two polylines benchmarks one and benchmarks two are at a Hausdorff distance (DH) from each other of less than d units, if each point of benchmark one is within d units of at least one point of benchmarks two, and if, reciprocally, each point of benchmarks two is less than d units away from each other by at least one point of benchmarks one.
 
-After Choosing the two benchmarks, I ran each algorithm on each experiment of the barber problem.
+The Hausdorff distance is defined as the greater of the two following components :
+
+\begin{itemize}
+    \item The first distance which is the largest value of the non-symmetrical distance from benchmarks one to benchmarks two,
+    \item The second distance which is the largest value of the non-symmetrical distance from benchmarks two to benchmarks one.
+\end{itemize}
+
+
+For this project I'm using the implementation of the library scipy which is implemented and documented here \url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.directed_hausdorff.html}
+
+From this principle and from the scipy documentation, we are taking the two distance produced by the algorithm then taking the minimum to avoid false positive.
+
+This distance has the advantage of providing two measurements. Right-of-way lines can thus be compared using the component starting from the shortest line. On the other hand, the Hausdorff distance, with the disadvantage of calculating the
+distance on the nearest pairs of points and not on homologous points. Homologous points are points that visually correspond to each other. For example, the point in benchmark 2 used to calculate distance one is not the Intuitively corresponding to the point of benchmark 2; it is simply the closest point. The distance from Hausdorff considers polylines as simple sets of dots unordered. This problem is particularly important for very sinuous or with loops. Small distances can then be sent back to different lines. Similarly, pairs of dots cannot be considered to be matches. Nevertheless, this particularity has the advantage of reducing calculation time: the algorithmic complexity of this algorithm is linear. 
+
+
+This method seems to be working better than DTW because there is no need for the dataset to know if the first measurement of the first sequence must match the first measurement of the other sequence and that the last measurement of the first sequence must match the last measurement of the other sequence (but it must not be its only match).
+
+
+
+\subsection{Interpretation of results after running the algorithms}
+
+After choosing the two benchmarks, I ran each algorithm on each experiment of the barber problem.
 The one \& two experiments are not similar in contrary to the 3 \& 4, which are similar by human eyes.
 Each output of each algorithm is put inside this tabular.
 
@@ -424,7 +409,7 @@ I have put a threshold of 20 with the directed Hausdorff. When the directed Haus
 
 In order to prove the usability of the usage of the Hausdorff distance, I decided to run a few more tests on other benchmarks.
 
-For that, there is a script inside the corpus of this dissertation which is called compare.py it takes two commits (iteration of the code) as parameters and then retrieves all the data from those benchmarks then run the comparison and tell if the benchmarks result have performance difference. \\
+For that, there is a script inside the corpus of this dissertation which is called compare.py it takes two commits (iteration of the code) as parameters and then retrieves all the data from those benchmarks then run the comparison and tell if the benchmarks result have behaviour difference. \\
 
 \begin{figure}[]
     \centering
