@@ -26,11 +26,19 @@
 
 \tableofcontents
 
+\newpage
+
+\section{Acknowledgment}
+
+
+First of all, I would like to thank my  supervisor, Stefan Marr who helped me to write this dissertation and understand the background work in benchmarking. \newline
+I would like to thank Laurence Tratt that answered few questions on the Setup of their experiments in the warmup analysis paper so I can reproduce the experiment and adapt it to the Rebench data.
+
 
 \section{Introduction}
 
 This dissertation is about benchmarking data analysis and more especially identifying difference in benchmarks behaviour. The task is complex, because the measurements data are very subject to noise and those are hard to identify programmatically; this dissertation analyses background work on the classification of a warm-up state of Just In Time compilation in order to identify behaviours difference. This classification is not enough to perform the identification of behaviour difference. I had to overview other methods present in statistical analysis based on curve comparison to identify behaviours difference such as Hausdorff Distance which help quantify those difference.\\
-This work is an approach of an evolution of the Rebench project, ReBench is a tool to run and document benchmark experiments; it is maintained by Stefan \citeauthor{ReBench:2018}. In this dissertation it use a side project, ReBenchDB, which is a project started in late 2019 by Stefan \citeauthor{ReBench:2018}. The goal of ReBenchDb is to store and facilitate the analytics process of the data recorded by ReBench. Benchmark data produced from Rebench doesn't classify automatically if that benchmark has reached a steady-state nor if their behaviour differs from the previous iteration of the code.  The differentiation of behaviours can save a lot of time when looked at benchmarks result because it can tell if the benchmarks result as differ from the previous iteration and are worth to look at.  \\ 
+This work is an approach of an evolution of the Rebench project, ReBench is a tool to run and document benchmark experiments; it is maintained by Stefan \citeauthor{ReBench:2018}. In this dissertation it use a side project, ReBenchDB, which is a project started in late 2019 by Stefan \citeauthor{ReBench:2018}. The goal of ReBenchDb is to store and facilitate the analytics process of the data recorded by ReBench. Benchmark data produced from Rebench doesn't classify automatically if that benchmark has reached a steady-state nor if their behaviour differs from the previous iteration of the code.
 
 \section{Problems}
 
@@ -87,14 +95,14 @@ However, if this code is really hot if it is executed really often, then it is w
 
 Those warm and hot phases are what \citep{barrett2017virtual} are interested in. Indeed they record every performance for a lot of algorithms. They wrote an algorithm which identifies if those warm and hot phase is really speeding up the code. This warm and hot phase can help us with the classification of a performance difference. The work done by \citep{barrett2017virtual} can help us the difference in behaviour in rebench data.
 
-\citep{barrett2017virtual} used krun, which is an benchmark executor which prepares the machine into a benchmarking environment, and make the operating system more precise for performing  measurements of computer algorithms / programs. It is kind of similar Rebench because it records some benchmarking data. But krun is more specified about studying those warm-up phases.
+\citep{barrett2017virtual} used krun, which is a benchmark executor and recorder which prepares the computer into a benchmarking environment, and make the operating system more precise for making benchmarks. It is kind of similar Rebench because it records some benchmarking data. But krun is more specified about studying those warm-up phases.
 
 \subsection{Background work on Warmup Phase Classification}
 
-In benchmarking analysis there is a background work on warm-up stage classification, this work can be used because it gives us a first approach of how behaviour relates to a warm-up class given in the paper and so it can be used to differentiate behaviour difference is those class are the same or different. In order to apply the warm-up phase classification, I implemented the paper of \citep{barrett2017virtual} about classifiying warm-up  of virtual machines present in the industry. 
+In benchmarking analysis there is a background work on warm-up stage classification, this work can be used because it gives us a first approach of how behaviour relates to a warm-up class given in the paper and so it can be used to differentiate behaviour difference if those class are the same or different. In order to apply the warm-up phase classification, I implemented the paper of \citep{barrett2017virtual} about classifiying warm-up of virtual machines present in the industry. 
 In the paper, multiple benchmarks were experimented on the virtual machine that they list in the paper to see when the Just In Time compilation happens and how it affects the performance.
-They have observed that Just In Time compilation usually increases the program performance. However, in very some benchmarks lost of performance happens or no stabilisation of the benchmarks (no steady-state). Moreover, They have observed the Just In Time compilation happens mostly during the first step of the benchmark data, which stipulate that there is a "warm-up phase".
-In \citep{barrett2017virtual} Papers for benchmark states classification, they used three steps.
+They have observed that Just In Time compilation the algorithm performance will increase overtime. However, in very some benchmarks / VM implementation there can be a decrease of performance or no stabilisation of the benchmarks (no steady-state). Moreover, They have observed the Just In Time compilation happens mostly during the first step of the benchmark data, which stipulate that there is a "warm-up phase".
+In \citep{barrett2017virtual} paper for benchmark states classification, they used three steps.
 
 \begin{itemize}
     \item The first step is to clean outliers such as garbage collection or Just In Time compilation as seen above. A garbage collector is a computer subsystem for automatic memory management.  It is responsible for recycling previously allocated and unused memory.  
@@ -135,27 +143,21 @@ The above results are actually obtained using the changepoint package from \cite
 
 In the warm-up paper, they discussed three different functions:
 
-cpt.mean which is used to detect changepoint in the mean (assuming that the variance is constant)
-cpt.var which is used to detect  in the variance (assuming that the mean is constant)
-cpt.meanvar which is used to detect changepoint in both the mean and the variance
-These three functions are largely configurable. One can thus vary (among others)
+\begin{itemize}
+    \item cpt.mean which is used to detect changepoint in the mean (assuming that the variance is constant)
+    \item cpt.var which is used to detect  in the variance (assuming that the mean is constant)
+    \item cpt.meanvar which is used to detect changepoint in both the mean and the variance
+\end{itemize}
 
 The nature of the algorithm used to detect "optimal" breakpoints...
 the type of test used to locate the changepoint (one can either assume that the residual distribution of the variables is Gaussian, or one can not make an assumption of distribution and use a non-parametric test)
 the type and extent of the penalty applied in order to limit over-segmentation.
-
-These aspects are discussed in \citep{killick2014changepoint}.
 
 \subsection{Classification}
 
 In order to test if the classification works to identify the behaviour difference between benchmarks, I must implement and modify a bit the algorithm that they used in the warm-up paper.
 There was some problem with the classification I adapted the algorithm which works now depending on the size of the benchmarks.
 The classify function from \citep{barrett2017virtual} takes as parameters the measurements from rebench and the length of the measurements it is useful because otherwise, the STEADY\_STATE\_LEN would stay to 500 which is not suitable when the length of the measures are under 500 for example. After all, it would mean that the steady-state length would be more than the size of measurements which is not possible.
-
-This code bellow is majorly from the \citep{barrett2017virtual} but is adapted in Python and vary the classification dynamically depending on the size of the whole benchmarks.
-
-After implementing the algorithm, I managed to write a little the script to compare two commits and see if the result of classification is good enough to be able to differentiate benchmark behaviour.
-I ran in some issues, for example, looking at the picture.
 
 
 You can see the result of this algorithm in the zip file (the corpus of the dissertation) it produced an image with the outliers and the classification given inside the filename.
@@ -347,8 +349,8 @@ From the table above you identify that the smaller the distance / area differenc
 
 
 As expected, the only algorithm that seems to work is the directed Hausdorff algorithm because it is not influenced by the size of the dataset, indeed as the curve length increase the difference of the score increase. 
-I order to classify if a benchmark has changed between two commits, I have to found a threshold where, if the result of an algorithm would surpass this threshold it will mean that the benchmarks have changed from the previous commit. I order to get that threshold I labelled by hand all the benchmarks by hand. For 50 benchmarks by hand six have a real changed by human eyes and the rest have not changed between commit. Those 50 benchmarks could be corresponding to our training data. The threshold that seems to classify better is 20 because based on that, the result of the directed Hausdorff algorithm is that value that is better to separate the behaviour changed benchmarks and those who have not changed.
-I have put a threshold of 20 with the directed Hausdorff. When the directed Hausdorff value is more than 20 is interesting to look at the benchmark because it means that there is a significant difference between the two benchmarks.
+I order to classify if a benchmark has changed between two commits, I have to found a threshold where, if the result of an algorithm would surpass this threshold it will mean that the benchmarks have changed from the previous commit. I order to get that threshold I labelled by hand all the benchmarks by hand. For 50 benchmarks by hand six have a real changed by human eyes and the rest have not changed between commit. Those 50 benchmarks could be corresponding to our training data. The threshold that seems to classify better is 20 because based on that, the result of the directed Hausdorff algorithm is that value that is better to separate the behaviour difference of benchmarks and those who have not different.
+I have put a threshold of 20 with the directed Hausdorff. When the directed Hausdorff value is more than 20 is interesting to look at the benchmark because it means that there is a significant difference between the two benchmarks. In the next section I will present few more example on the data that will prove the usability of the directed Hausdorff distance. 
 
 
 \subsection{Usage for different example}
@@ -383,17 +385,10 @@ For that, there is a script inside the corpus of this dissertation which is call
 \begin{figure}[]
     \centering
     \includegraphics[width=1\textwidth]{images/plot_CD_100.56999999999994.png}
-    \caption{Benchmark one and two from CD algorithm which are classified ashaving the same behaviour difference}
+    \caption{Benchmark one and two from CD algorithm which are classified as having the same behaviour difference}
     \label{fig:bench_1_2_4}
 \end{figure}
 
-
-\begin{figure}[]
-    \centering
-    \includegraphics[width=1\textwidth]{images/Screenshot_20200829_135418.png}
-    \caption{Screen shot of the script giving the result of the classification}
-    \label{fig:bench_1_2_5}
-\end{figure}
 
 As you have seen the result for from figure \ref{fig:bench_1_2_3} could be classified as the same by human eyes but it depends on where do you put the threshold the result from this comparison with Hausdorff distance was "50.24" which is above the threshold given in the script a big threshold should mean less sensitivity for the performance difference detection.\\
 
@@ -504,7 +499,7 @@ OpenAPI allows you to detail the operation of an API through a file in YAML or J
 
 \subsection{Deployement with Docker}
 
-To deploy the application, I am using Docker; this is an open-source software platform to create, deploy and manage containers a container image is. It is a set of light and independent software processes, gathering all the files necessary for the execution of the methods: code, runtime, system tools, library and parameters. They can be used to run Linux or Windows applications. So I dockerised the app to make it easier to deploy in the future. I also use docker-compose, it's a tool that allows to describe (in a YAML file) and manage (in the command line) several containers as a set of inter-connected services. In this application, I describe a set composed of 3 containers: Postgresql, the server node.js for the REST API and a python notebook to present the data. In the beginning, Docker was only used to manage the local working environment, for example, dependencies like PostgreSQL, which allowed me to separate the data from other databases on my computer.
+To deploy the application, I am using Docker; this is an open-source software which is wrapped around a daemon in order to create and manage containers a container image is. It is a set of light and independent software processes, gathering all the files necessary for the execution of the methods: code, runtime, system tools, library and parameters. They can be used to run Linux or Windows applications. So I dockerised the app to make it easier to deploy in the future. I also use docker-compose, it's a tool that allows to describe (in a YAML file) and manage (in the command line) several containers as a set of inter-connected services. In this application, I describe a set composed of 3 containers: Postgresql, the server node.js for the REST API and a python notebook to present the data. In the beginning, Docker was only used to manage the local working environment, for example, dependencies like PostgreSQL, which allowed me to separate the data from other databases on my computer.
 
 The stack of the project in production is launched like this in production; it builds and launches Docker and does the network mapping between them.
 
@@ -531,8 +526,8 @@ This master thesis work was mainly on the analysis of Rebench data, and The goal
 How can you use the work from this dissertation?
 When you have made a modification to your code, its would be useful to know if that modification has an impact on the performance of the program (positively or negatively) to understand that the benchmark data is helpful to look at and require further analysis. So The first things that might be good to look at are to integrate the report to GitHub. There is a new  at GitHub which is  actions \url{https://docs.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions}
 After triggering the CI by committing to the project would be after the ReBench run, take the data by the commit from the RebenchDB and after trigger the warm-up analysis script that you can find here.
-You could also compare the Directed Hausdorf score from the previous commit and see if there is a relevant change of behaviour between the benchmarks.  The classification of warmup stage can be also reused in an python programm.
-The API is openly accessible at this adress \url{https://api.rebench.vatoth.dev} and/or can deployed easily with docker. This allow other developper that can used rebench data to manipulate them easily.
+You could also compare the Directed Hausdorff score from the previous commit and see if there is a relevant change of behaviour between the benchmarks.  The classification of warmup stage can be also reused in an python program.
+The API is openly accessible at this address \url{https://api.rebench.vatoth.dev} and/or can deployed easily with docker. This allow other developper that can used rebench data to manipulate them easily.
 
 \bibliography{reference}
 
