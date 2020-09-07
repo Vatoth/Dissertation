@@ -1,4 +1,5 @@
-\documentclass{article}
+\documentclass[12pt,a4paper]{article}
+\usepackage[pdfencoding=auto, colorlinks=false, pdfborder={0 0 0},pdftitle={Disseration}, pdfauthor={Quentin Sonnefraud}, pdfsubject={Disseration}, pdfkeywords={}, bookmarks=true, pdfcreator={Quentin Sonnefraud}, pdflang=UN]{hyperref}
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 \usepackage{url}
@@ -15,9 +16,9 @@
   \input{#1-words.sum} words%
 }
 
-\title{An Approach to Identify Behaviour Differences Based on Hausdorff Distance \\ 7600 words}
+\title{An Approach to Identify Behaviour Differences Based on Hausdorff Distance \\ 7500 words}
 
-\author{Quentin Sonnefraud}
+\author{Quentin Sonnefraud \\ Supervisor: Stefan Marr}
 \date{June 2020 - September 2020}
 
 \begin{document}
@@ -31,32 +32,27 @@
 \section{Acknowledgment}
 
 
-First of all, I would like to thank my  supervisor, Stefan Marr who helped me to write this dissertation and understand the background work in benchmarking. \newline
-I would like to thank Laurence Tratt that answered few questions on the Setup of their experiments in the warmup analysis paper so I can reproduce the experiment and adapt it to the Rebench data.
+First of all, I would like to thank my supervisor, Stefan Marr, who helped me to write this dissertation and understand the background work in benchmarking. \newline
+I would like to thank Laurence Tratt that answered a few questions on the Setup of their experiments in the warm-up analysis paper so I can reproduce the experiment and adapt it to the ReBench data.
 
 
 \section{Introduction}
 
-This dissertation is about benchmarking data analysis and more especially identifying difference in benchmarks behaviour. The task is complex, because the measurements data are very subject to noise and those are hard to identify programmatically; this dissertation analyses background work on the classification of a warm-up state of Just In Time compilation in order to identify behaviours difference. This classification is not enough to perform the identification of behaviour difference. I had to overview other methods present in statistical analysis based on curve comparison to identify behaviours difference such as Hausdorff Distance which help quantify those difference.\\
-This work is an approach of an evolution of the Rebench project, ReBench is a tool to run and document benchmark experiments; it is maintained by Stefan \citeauthor{ReBench:2018}. In this dissertation it use a side project, ReBenchDB, which is a project started in late 2019 by Stefan \citeauthor{ReBench:2018}. The goal of ReBenchDb is to store and facilitate the analytics process of the data recorded by ReBench. Benchmark data produced from Rebench doesn't classify automatically if that benchmark has reached a steady-state nor if their behaviour differs from the previous iteration of the code.
-
-\section{Problems}
-
-The data in benchmark can be very noisy because of the presence of garbage collection in the language implementation which removes a lot of unused object from memory, this task takes a lot of time and creates a spike in the measurements. I will first try to find a technique that removes those outliers. The second problem is to identify the difference between the two benchmarks there is a study that demonstrates the classification of the warm-up phase, which can help differentiate that behaviour in benchmarks data. I will find that those classifications are not enough to find the difference between iteration of benchmarks because it oversimplifies the data. Then we had to find other techniques to compare the curve of measurements. The differentiation of behaviours can save a lot of time when looked at benchmarks result because it can tell for the user if the benchmarks result as differ from the previous iteration.
-
-
+This dissertation is about benchmarking data analysis and more especially identifying the difference in benchmarks behaviour. The task is complex because the measurements data are very subject to noise and those are hard to identify programmatically; this dissertation analyses background work on the classification of a warm-up state of Just In Time compilation in order to identify behaviours difference. This classification is not enough to perform the identification of behaviour difference. This dissertation overview other methods present in statistical analysis based on curve comparison to identify behaviours difference such as Hausdorff Distance which help quantify those difference.\\
+This work is an approach of an evolution of the ReBench project, ReBench is a tool to run and document benchmark experiments; it is maintained by Stefan \citeauthor{ReBench:2018}. In this dissertation, it uses a side project, ReBenchDB, which is a project started in late 2019 by Stefan \citeauthor{ReBench:2018}. The goal of ReBenchDb is to store and facilitate the analytics process of the data recorded by ReBench. Benchmark data produced from ReBench doesn't classify automatically if that benchmark has reached a steady-state nor if their behaviour differs from the previous iteration of the code.
+The data in benchmark can be very noisy because of the presence of for example the garbage collection in the language implementation which removes a lot of unused object from memory, this task takes a lot of time and creates a spike in the measurements. We will first try to find a technique that removes those outliers. The second problem is to identify the difference between the two benchmarks there is a study that demonstrates the classification of the warm-up phase, which can help differentiate that behaviour in benchmarks data. We will find that those classifications are not enough to see the difference between iteration of benchmarks because it oversimplifies the data. Then we had to find other techniques to compare the curve of measurements. From this comparison, we will view that the Directed Hausdorff distance will perform better in term of identifying the behaviour difference and in computational cost. The differentiation of behaviours can save a lot of time when looked at benchmarks result because it can tell for the user if the benchmarks result as differ from the previous iteration. 
 
 \section{Related work in benchmarking}
 
-\subsection{Rebench}
+\subsection{ReBench}
 
-Rebench is a tool developed by Stefan Marr in order to run and document benchmarks reproducibility. The data that this dissertation will relate is data recorded by Rebench. In the data produced by rebench, there is a lot of metadata, for example, all the machine meta for benchmarking reproducibility. I will focus more on the measurements made by RebenchDB and use the commit in the meta which those measurements relate to. The data that I used is from benchmarking that language implementation for various computing algorithms. The project rebench itself does not store data its the side project that acts as a wrapper around a SQL (Postgresql) database.
+ReBench is a tool developed by Stefan Marr in order to run and document benchmarks reproducibility. The data that this dissertation will relate is data recorded by ReBench. In the data produced by ReBench, there is a lot of metadata, for example, all the machine meta for benchmarking reproducibility. I will focus more on the measurements made by ReBenchDB and use the commit in the meta which those measurements relate to. The data that I used is from benchmarking that language implementation for various computing algorithms. The project ReBench itself does not store data its the side project that acts as a wrapper around a SQL (Postgresql) database.
 
 The data is organised as such a benchmark comes from an experiment which is related to the sources generally the git repository and the iterations of the code, there can be many trials of this benchmarks, for example, four trials. This measurements that are recorded are the number of iterations of the algorithms and the value in milliseconds of the measurements. There is, of course, a lot of metadata recorded in order to reproduce the experiment correctly, but I won't use it the dissertation because I am not running benchmarks.
 
 \subsection{Warm-up stage classification in Just in Time compilation}
 
-In benchmarks data analysis, I focused my work on a study that classifies the warm-up state of Just In Time compilation given measurements of e benchmark, and I will briefly explain what is Just in Time Compilation and what consists the warm-up phase and how the work that \citep{barrett2017virtual} works and how I can use it to perform identification for performance / behaviour difference, then in the last part its the application of the Paper, I explained why is not sufficient in order to identify behaviour difference of the benchmarks data  present in their paper . We first need to define what is Just in time compilation and use and apply for the work already done by \citep{barrett2017virtual}.
+In benchmarks data analysis, the part focused on a study that classifies the warm-up state of Just In Time compilation has given measurements of e benchmark, and I will briefly explain what is Just in Time Compilation and what consists the warm-up phase and how the work that \citep{barrett2017virtual} works and how I can use it to perform identification for performance/behaviour difference, then in the last part its the application of the paper, at the end of this part it explains why is not sufficient in order to identify behaviour difference of the benchmarks data present in their paper. We first need to define what is Just in time compilation and use and apply for the work already done by \citep{barrett2017virtual}.
 
 
 
@@ -85,23 +81,24 @@ At first, the profiler runs everything through the interpreter.
 
 If the same lines of code are executed a few times, this piece of code is considered "warm". If it is executed very often, it is considered "hot".
 
-When a function becomes lukewarm, the Just In Time will send it to the compiler and will store the result of the compilation.
+When a function warm-up, the function will be queued for compilation, then the Just In Time compiler will be called for compilation and will produce native code for the function.
 
 Each line of code is compiled as a "chunk". Extracts are indexed by line number and by variable type. If the profiler notices that the same code with the same variable types is executed again, it will simply use the compiled stub.
 
-This helps speed things up. But as I said, a compiler can do much more. It can take the time to figure out the most efficient way to do certain things to make optimisations. The basic compiler will do some of these optimisations. This should not take too much time, because it doesn't want to freeze the execution for too long.
+This helps speed things up. But as before, a compiler can do much more. It can take the time to figure out the most efficient way to do certain things to make optimisations. The basic compiler will do some of these optimisations. This should not take too much time, because it doesn't want to freeze the execution for too long.
 
 However, if this code is really hot if it is executed really often, then it is worth taking the time to do more optimisations.
 
-Those warm and hot phases are what \citep{barrett2017virtual} are interested in. Indeed they record every performance for a lot of algorithms. They wrote an algorithm which identifies if those warm and hot phase is really speeding up the code. This warm and hot phase can help us with the classification of a performance difference. The work done by \citep{barrett2017virtual} can help us the difference in behaviour in rebench data.
+Those warm and hot phases are what \citep{barrett2017virtual} are interested in. Indeed they record every performance for a lot of algorithms. They wrote an algorithm which identifies if those warm and hot phase is really speeding up the code. This warm and hot phase can help us with the classification of a performance difference. The work done by \citep{barrett2017virtual} can help us the difference in behaviour in ReBench data.
 
-\citep{barrett2017virtual} used krun, which is a benchmark executor and recorder which prepares the computer into a benchmarking environment, and make the operating system more precise for making benchmarks. It is kind of similar Rebench because it records some benchmarking data. But krun is more specified about studying those warm-up phases.
+\citep{barrett2017virtual} used krun, which is a benchmark executor and recorder which prepares the computer into a benchmarking environment, and make the operating system more precise for making benchmarks. It is kind of similar ReBench because it records some benchmarking data. But krun is more specified about studying those warm-up phases.
 
 \subsection{Background work on Warmup Phase Classification}
 
-In benchmarking analysis there is a background work on warm-up stage classification, this work can be used because it gives us a first approach of how behaviour relates to a warm-up class given in the paper and so it can be used to differentiate behaviour difference if those class are the same or different. In order to apply the warm-up phase classification, I implemented the paper of \citep{barrett2017virtual} about classifiying warm-up of virtual machines present in the industry. 
-In the paper, multiple benchmarks were experimented on the virtual machine that they list in the paper to see when the Just In Time compilation happens and how it affects the performance.
-They have observed that Just In Time compilation the algorithm performance will increase overtime. However, in very some benchmarks / VM implementation there can be a decrease of performance or no stabilisation of the benchmarks (no steady-state). Moreover, They have observed the Just In Time compilation happens mostly during the first step of the benchmark data, which stipulate that there is a "warm-up phase".
+In benchmarking analysis there is a background work on warm-up stage classification \cite{barrett2017virtual}, this work can be used because it gives us a first approach of how behaviour relates to a warm-up class given in the paper and so it can be used to differentiate behaviour difference if those class are the same or different. In order to apply the warm-up phase classification, for that, we needed to investigate the warm-up research.
+This research is about classifying warm-up of virtual machines present in the industry, such as the Java virtual machine. 
+In the research, multiple benchmarks have been recorded on the virtual machine in order to see how Just in time compilation behave on the overall performance.
+In the research, it says that Just In Time compilation the algorithm performance will increase over time. However, in very some measurements of the benchmarks, there can be a decrease in performance or can lead to no stabilisation of the measurements (no steady-state). In the research, they have observed the Just In Time compilation is present during the first step of the benchmark data, so they ignore this phase during the first step of the classification.
 In \citep{barrett2017virtual} paper for benchmark states classification, they used three steps.
 
 \begin{itemize}
@@ -115,12 +112,12 @@ In \citep{barrett2017virtual} paper for benchmark states classification, they us
 
 \subsection{Clean outliers}
 
-In time-series data analysis, the detection of anomalies is the identification of elements, events or rare observations that raise suspicions by differing significantly from the majority of other data. They had first mostly determined the outliers ( much larger / pretty much smaller than close neighbours). In the paper \citep{barrett2017virtual} they said that this data could particularly be compile-time of Just In Time, Garbage collection or basically other processes that specifically do specifically interfere with the benchmarks in a subtle way. I applied the same techniques of \citep{barrett2017virtual} to get the same results which, for the most part, is a rolling window to remove the outliers in the benchmarks like the garbage collection in an actually major way.
+In time-series data analysis, the detection of anomalies is the identification of elements, events or rare observations that raise suspicions by differing significantly from the majority of other data. They had first mostly determined the outliers ( much larger / pretty much smaller than close neighbours). In the paper \citep{barrett2017virtual} they said that this data could particularly be compile-time of Just In Time, Garbage collection or basically other processes that specifically do interfere with the benchmarks in a subtle way. We applied the same techniques of \citep{barrett2017virtual} to get the same results which, for the most part, is a rolling window to remove the outliers in the benchmarks like the garbage collection in an actually major way.
 
-For example, the problem here from the previous techniques with rolling window is that it does not remove the first outliers because it ignores the 200 first measurements, but you could have some outliers in this part of the measurements. So it can be in the future a future work to find better techniques to clean outliers from rebench data other than removing with a rolling window which doesn't remove outliers.
+For example, the problem here from the previous techniques with rolling window is that it does not remove the first outliers because it ignores the 200 first measurements, but you could have some outliers in this part of the measurements. So it can be in the future a future work to find better techniques to clean outliers from ReBench data other than removing with a rolling window which doesn't remove outliers.
 Anomaly detection consists in highlighting data with different behaviour from the majority of the data. 
-Indeed, the detection can be performed in a supervised mode in case information on the normality of the data is available which is not the case here because it would mean to label the outlier inside the rebench data. In other words, any data in the learning base can be labelled as normal or abnormal.
-As for the detection in unsupervised mode, no information on the normality of the data is available which the case here and the case in the \citep{barrett2017virtual} paper and for the rebench data. This can be a future work if someone takes time to identify outliers by hand or with a supervised script to learn something from those outliers.
+Indeed, the detection can be performed in a supervised mode in case information on the normality of the data is available which is not the case here because it would mean to label the outlier inside the ReBench data. In other words, any data in the learning base can be labelled as normal or abnormal.
+As for the detection in unsupervised mode, no information on the normality of the data is available which the case here and the case in the \citep{barrett2017virtual} paper and for the ReBench data. This can be a future work if someone takes time to identify outliers by hand or with a supervised script to learn something from those outliers.
 
 \subsubsection{Unsupervised techniques}
 The unsupervised approach is the most suitable for anomaly detection problems and benchmarks data. In this approach, the different algorithms try to distinguish bad observations by learning about the data set, without having the labels of the observations: there is no set of observations identified a priori as anomalies. It is therefore not necessary to have labelled data, and this simplifies the problem of preparing the data before learning and all the difficulty in constructing labels.
@@ -131,11 +128,11 @@ In the paper they apply the rolling window by removing all elements that are out
 \subsection{Changepoint Detection}
 In statistical analysis,  the changepoint detection problem is a regression problem to estimate the times at which a signal exhibits changes in the distribution. Classically, changepoint detection is performed for a signal with changes in the mean. More generally, changepoint detection is performed for a signal with changes in the distribution (for example, in the mean and variance). \\
 
-Changepoint detection can be applied to a sound signal of a program for which we wish to estimate the moments when situations change, to the detection of computer attacks, or to quality control, here for the rebench data it helps to classify behaviour in the warm-up analysis. \\
+Changepoint detection can be applied to a sound signal of a program for which we wish to estimate the moments when situations change, to the detection of computer attacks, or quality control, here for the ReBench data it helps to classify behaviour in the warm-up analysis. \\
 
 This next will deals with the problem of detecting changepoint retrospectively (known as offline) when all the signal data are available. This context is different from a real-time detection (online) where the signal data arrive on the fly it could be interesting to classify on the fly after reaching and classifying a stabilisation of a benchmark and stoping recording the benchmark data in order to save time, but online detection is less able to detect precisely the moment of rupture.
 
-So first I used a package which allows me to do changepoint analysis which is called ruptures \citep{truong2020selective}, it works well, but during the comparison of my result and the result from the warm-up paper, it appears I don't get the same result from the experiment. So in order to get the same result, after reading the warm-up paper, I prefer to use the algorithm from R "changepoint" \citep{killick2014changepoint} in order to reproduce the experiment correctly. The implementation is a wrapper around the R package using python. 
+So first I used a package which allows me to do changepoint analysis which is called ruptures \citep{truong2020selective}, it works well, but during the comparison of my result and the result from the warm-up paper, it appears we don't get the same result from the experiment. So in order to get the same result, after reading the warm-up article, in order, the implementation will use the algorithm from R "changepoint" \citep{killick2014changepoint} in order to reproduce the experiment correctly. The implementation is a wrapper around the R package using python. 
 
 Based on these models, here is the kind of segmentation that they proposed in their paper:
 
@@ -155,13 +152,13 @@ the type and extent of the penalty applied in order to limit over-segmentation.
 
 \subsection{Classification}
 
-In order to test if the classification works to identify the behaviour difference between benchmarks, I must implement and modify a bit the algorithm that they used in the warm-up paper.
-There was some problem with the classification I adapted the algorithm which works now depending on the size of the benchmarks.
-The classify function from \citep{barrett2017virtual} takes as parameters the measurements from rebench and the length of the measurements it is useful because otherwise, the STEADY\_STATE\_LEN would stay to 500 which is not suitable when the length of the measures are under 500 for example. After all, it would mean that the steady-state length would be more than the size of measurements which is not possible.
+In order to test if the classification works to identify the behaviour difference between benchmarks, there is a code implementation.
+There was some problem with the classification, and the code is adapted for the algorithm which works now depending on the size of the benchmarks.
+The classify function from \citep{barrett2017virtual} takes as parameters the measurements from ReBench and the length of the measurements it is useful because otherwise, the STEADY\_STATE\_LEN would stay to 500 which is not suitable when the length of the measures are under 500 for example. After all, it would mean that the steady-state length would be more than the size of measurements which is not possible.
 
 
 You can see the result of this algorithm in the zip file (the corpus of the dissertation) it produced an image with the outliers and the classification given inside the filename.
-The major problem to differentiate the behaviour of benchmark of this technique is that it removes a lot of information you can have totally the same behaviour from the classification for example 2 benchmarks classify as "warm-up", but it will not reflect the reality because they can be classified as a warm-up but the curve means can be much higher compare to other which need to be considered. So I have to find other technique, and for that, I used some other techniques already used on the industry for compared directly curve by quantifying them.
+The major problem to differentiate the behaviour of benchmark of this technique is that it removes a lot of information you can have the same behaviour from the classification for example 2 benchmarks classify as "warm-up", but it will not reflect the reality because they can be classified as a warm-up but the curve means can be much higher compare to other which need to be considered. So we need to explore other algorithms to find different technique to compared directly curve by quantifying them.
 
 
 
@@ -184,46 +181,21 @@ The major problem to differentiate the behaviour of benchmark of this technique 
 \end{figure}
 
 
-The main problem to identify performance difference with these techniques is that it only classifies warm-up state and not perform as the whole. Based on this approach, I decided to reuse the outliers cleaning but applying another algorithm to try to differentiate performance difference. For example for figure \ref{fig:bench_node_flat} and \ref{fig:bench_somns_flat} they are both classified as warmup indeed is not significant to say that those curves are the same/different We need another approach and for that, I am investigating algorithm used in statitical analysis and more particularly curve comparison.
+The main problem to identify performance difference with these techniques is that it only classifies warm-up state and not perform as the whole. Based on this approach, The software reuse the outliers cleaning but applying another algorithm to try to differentiate performance difference. For example for figure \ref{fig:bench_node_flat} and \ref{fig:bench_somns_flat} they are both classified as warm-up indeed is not significant to say that those curves are the same/different We need another approach and for that, the next part will investigate algorithm used in statistical analysis and more particularly curve comparison.
 
 
 
 
-\section{Overview of algorithm to quantify the identify difference between bencharking curve}
+\section{Overview of algorithms to quantify the identity difference between benchmarking curve}
 
-As you have seen, the classification is not sufficient to identify the performance difference between benchmarks, So I have to try other techniques. I have reviewed and try some techniques to quantify the difference between benchmarks and report if changement of behaviour as occurs. During this dissertation, I prefer to pick one benchmark problem, which is the sleeping barber algorithm \citep{reynolds2002linda}, which is a sharing resources problem in multi-tasking. The next subsection will be about explaining what is the sleeping algorithm and explaining why I am getting that kind of plot. I have selected only a subset of those benchmarks because I have tried to run on more benchmark, but my computer could not handle it because it does not have enough RAM / CPU power. First I tried to run on all the data, but when it run analysis on all the data it takes one day and ten hours to run all benchmarks with comparison algorithms which are not suitable given the time frame for the dissertation, so in future work may be using a bigger computer/server it could be interesting to run on other benchmarks algorithm data.
+As you have seen, the classification is not sufficient to identify the performance difference between benchmarks. So the next part has to try other techniques. The part reviews and try some techniques to quantify the difference between benchmarks and report if Changement of behaviour as occurs. During this dissertation, I prefer to pick one benchmark problem, which is the sleeping barber algorithm \citep{reynolds2002linda}, which is a sharing resources problem in multi-tasking. The next subsection will be about explaining what is the sleeping algorithm and explaining why I am getting that kind of plot. I have selected only a subset of those benchmarks because I have tried to run on more benchmark, but my computer could not handle it because it does not have enough RAM / CPU power. First I tried to run on all the data, but when it run analysis on all the data it takes one day and ten hours to run all benchmarks with comparison algorithms which are not suitable given the time frame for the dissertation, so in future work may be using a bigger computer/server it could be interesting to run on other benchmarks algorithm data.
 
 \subsection{Sleeping Barber problem}
-This algorithm models a finite size queue and this a multi threading problem which encourage competition.
-This algorithm will have to be in two threads types, one barber which runs a salon where there are waiting chairs and an armchair. When the hairdresser has no clients, he sits in the chair and falls asleep. When a client arrives, he must wake up the hairdresser to have his hair done. Then there is clients which are as many clients that you have memory, if other threads commes during this time other customers arrive, they sit on a waiting chair if there are any left. Otherwise, they will encourage competition.
+This algorithm model a finite size queue and this a multi-threading problem which encourage competition.
+This algorithm will have to be in two threads types, one barber who runs a salon where there are waiting chairs and an armchair. When the hairdresser has no clients, he sits in the chair and falls asleep. When a client arrives, he must wake up the hairdresser to have his hair done. Then you can have as many clients that you have capacity in memory, if other threads come during this time other customers arrive, they sit on a waiting chair if there are any left. Otherwise, they will encourage competition.
 While the program will have only one barber, there may be as many customers as there is memory on the computer. The client threads will, therefore, pile up, waiting for space to become available in the waiting room, and then the barber will take care of them it will spawn a new thread. There are many threads that the computer allow or the user will enable them to.
 
-\subsubsection{ What does the barber do?}
-The thread symbolising the barber will, therefore, be unique so one barber equal one thread. It will be started when the program is launched, before any customer, and will loop back on itself for all eternity.
-Here's what our barber will spend his life doing:
-
-\begin{itemize}
-    \item The barber will first check that there is somebody in the waiting room ? If a customer is there, The barber will take care of him, and if not the barber thread will wait;
-    \item When a customer is there the barber take him on the chair;
-    \item The barber shave the customer;
-    \item The barber thread wait.
-    \item Of course, when we get to the end, the algorithm loop back in.
-\end{itemize}
-
-\subsubsection{ What does the customer do?}
-
-Here are the actions that the thread symbolising each customer will perform. If there are several customers, identical threads will compete with each other:
-
-\begin{itemize}
-    \item The customer will look in the hairdressing salon to see if there's any free space. If there is, the customer goes inside, if not, the thread wait;
-    \item When The customer is inside The customer will sit on a chair
-    \item The customer will wait until the barber is free;
-    \item The customer will get up from his chair and go into the room;
-    \item The customer will let myself trim my beard;
-    \item When the barber is done, the customer will pay and go home.
-\end{itemize}
-
-Looking at the difference in the number of tasks between the barber's and the client's list of actions, we notice that the client does more things. In fact, the client has to manage an additional resource compared to the barber, he need to check if he can sit and have place in the waiting room when he comes to the salon. On the benchmarks from the sleeping barber experiments, you can get some kind of step which you can identify as when the algorithm used the maximum of the threads, and that can explain the poor performance of the algorithm. And when the step is lower that's means there is not so much task going trought the algorithm.
+Looking at the difference in the number of tasks between the barber's and the client's list of actions, we notice that the client does more things. In fact, the client has to manage an additional resource compared to the barber, and he needs to check if he can sit and have a place in the waiting room when he comes to the salon. On the benchmarks from the sleeping barber experiments, you can get some kind of step which you can identify as when the algorithm used the maximum of the threads, and that can explain the poor performance of the algorithm. And when the step is lower that's means there is not so much task going through the algorithm.
 
 \subsection{Benchmarks data from Sleeping Barber experiment}
 
@@ -246,26 +218,27 @@ For running the comparison between two curves, I chose four iterations of the ex
 
 \subsection{Data preparation}
 
-In order to remove outliers which are not really useful and can lead to errors in curve comparison, I decided to remove outliers with the same techniques that they used in the warm-up paper but with small modifications because it appears that there are still outliers in the measurements from Rebench Data. There was some problem with for example with garbage collection outliers removing because in the rebench data there was clearly outlier that past the warm-up phase which should have been removed, so I reduced the ignore phase to first five per cent (first hundred measurements for a benchmark of two thousand measurements which are ignored).
+In order to remove outliers which are not really useful and can lead to errors in curve comparison, I decided to remove outliers with the same techniques that they used in the warm-up paper but with small modifications because it appears that there are still outliers in the measurements from ReBench Data. There was some problem with for example with garbage collection outliers removing because in the ReBench data there was clearly outlier that past the warm-up phase which should have been removed, so I reduced the ignore phase to first five per cent (first hundred measurements for a benchmark of two thousand measurements which are ignored).
 
 
 \subsection{Presentation of four algorithms to compare curve}
 
 In statistical analysis, the notion of distance is useful for quantifying and describing the objects present in
-a curve, for example. The desire to remain in the space of the image requires the use of specific distances, which provide exclusively integer results. I will used methods implemented by \citep{jekel2019similarity} to calculate a similarity score between benchmarks and try to use this score to indentify if there behaviour difference between two benchmarks.
+a curve. I will use methods implemented by \citep{jekel2019similarity} to calculate a similarity score between benchmarks and try to use this score to identify if there behaviour difference between two benchmarks.
 
 \subsubsection{Area method}
 
-First, I have used Area \citep{jekel2019similarity} method to quantify the difference between the curve, this an simple algorithm for estimate the area between two curves in two-dimensional space which the case of the measurements of RebenchData.\\
+First, I have used Area \citep{jekel2019similarity} method to quantify the difference between the curve, this a simple algorithm for an estimate the area between two curves in two-dimensional space which the case of the measurements of ReBenchData.\\
 Strictly speaking, the expression area under the curve refers to the area A of the domain delimited by a curve (represented in an x-y diagram) and three straight lines (the x-axis and two vertical lines with abscissa a and b). If the curve has the equation $y=f(x)$, the area is $A=\int _{a}^{b}f(x)\, {d} x$. This area is a true area (e.g. milliseconds for benchmarks) only if the function f has only positive (or zero) values over the interval [a,b] and if both the abscissa and the ordinate are lengths (with the same choice of unit, e.g. milliseconds for benchmarks).\\
-For the purpose of detecting if the behaviour has changed between two benchmarks, it is not interesting because it quantifies the area a whole and area can be equal but not their behaviour.
+To detect if the behaviour has changed between two benchmarks, it is not interesting because it quantifies the area a whole and area can be equal but not their behaviour.
+It seems that during testing, the area method was not that good as comparing the mean of two benchmarks iteration because the area of the curve is not an independent variable to compare two benchmarks.
 
 \subsubsection{Curve Length Measure}
 
 
-Let consider in the plane a curve \citep{moran1966measuring} which is the graph of a function f defined on the interval [a, b]. For example, the algorithm will calculate the length of this curve. To do this, we will approximate the curve by a broken line formed of n segments and calculate the distance of this fractured line. We will then obtain the exact length of the curve by a limit process.
+Let consider in the plane a curve \citep{moran1966measuring} which is the graph of a function f defined on the interval [a, b]. For example, the algorithm will calculate the length of this curve. To do this, the algorithm will approximate the curve by a broken line formed of n segments and calculate the distance of this fractured line. The algorithm will then obtain the exact length of the curve by a limit process.
 Theoretically, the length of the curve representative of a function f over an interval [a; b] (on which it is differentiable) is given by $\int_{a}^{b} \sqrt{1+f^{\prime}(x)^{2}} d x$
-This makes it possible to obtain the exact value compared to the initial problem as well as an approximate value and appreciate the accuracy of the algorithm according to the value of n. So we are sure that the value is an exact value and not an approximation compared from the Area method, for example. It seems also that the lenght of the curve is not the only variable to compare two benchmarks.
+This makes it possible to obtain the exact value compared to the initial problem as well as an approximate value and appreciate the accuracy of the algorithm according to the value of n. So we are sure that the value is an exact value and not an approximation compared from the Area method. It also seems that the length of the curve is not the independent variable to compare two benchmarks.
 The curve length measure could work to differentiate the algorithm that has a lot of variance difference across the benchmark. This is not always the case because sometimes both benchmarks can I have a kind of flat curve, or can I have no steady state.
 The application of the curve length measure used in this dissertation is from \citep{jekel2019similarity}
 
@@ -280,27 +253,27 @@ In short, the DTW algorithm consists of three steps:
 \begin{itemize}
     \item Calculation of local distances between two measurements point
     \item Using Dynamic programming to obtain the global optimum \begin{itemize}
-        \item a) Calculation of increased distances. Only the minimum predecessors are kept. for each point int calculate local optimum
+        \item a) Calculation of increased distances. Only the minimum predecessors are kept. for each point, int calculate local optimum
         \item b) Backtrack to find the minimum distance for the global optimum
     \end{itemize}
-    \item Result: Cumulative distance of each minimum distance find between measurements.
+    \item Result: Cumulative distance of each minimum distance found between measurements.
 \end{itemize}
 
-The lower this cumulative distance is the more like the benchmarks are the same.
+The lower this cumulative distance is, the more like the benchmarks are the same.
 
-The effectiveness of DTW was not worth because sometimes for very long benchmarks the algorithm needed a lot of memories in fact, I could not run it in my computer for 5000 measurements because it took more than 8 gigabytes. But for small benchmark
+The effectiveness of DTW was not worth because sometimes for very long benchmarks the algorithm needed a lot of memories in fact, I could not run it in my computer for 5000 measurements because it took more than 8 gigabytes. But for a small benchmark.
 Also from the results, it needed data preparation to be run correctly by with no good result as the Hausdorff distance \ref{result}
-The computational cost is $O(N^2)$ which N is the size of the benchmarks being compared..
+The computational cost is $O(N^2)$ which N is the size of the benchmarks being compared.
 The application used in this dissertation is a work done by \citep{salvador2007toward}
 
 \subsubsection{Hausdorff Distance }
-The Hausdorff distance \citep{belogay1997calculating} is used to account for the maximum deviation between two polylines (measurements one, measurements two) from \ref{fig:bench_1_2} . By definition, two polylines measurements one and measurements two are at a Hausdorff distance (DH) from each other of less than d units, if each point of benchmark one is within d units of at least one point of measurements two, and if, reciprocally, each point of measurements two is less than d units away from each other by at least one point of measurements one.
+The Hausdorff distance \citep{belogay1997calculating} is used to account for the maximum deviation between two polylines (measurements one, measurements two) from \ref{fig:bench_1_2}. By definition, two polylines measurements one and measurements two are at a Hausdorff distance (DH) from each other of less than d units, if each point of benchmark one is within d units of at least one point of measurements two, and if, reciprocally, each point of measurements two is less than d units away from each other by at least one point of measurements one.
 
 The Hausdorff distance is defined as the greater of the two following components :
 
 \begin{itemize}
     \item The first distance which is the largest value of the non-symmetrical distance from measurements one to measurements two from figure \ref{fig:bench_1_2},
-    \item The second distance which is the largest value of the non-symmetrical distance from measurements two to measurements one from figure \ref{fig:bench_1_2}.
+    \item The second distance, which is the largest value of the non-symmetrical distance from measurements two to measurements one from figure \ref{fig:bench_1_2}.
 \end{itemize}
 
 
@@ -312,13 +285,13 @@ This distance has the advantage of providing two measurements. Right-of-way line
 distance on the nearest pairs of points and not on homologous points. Homologous points are points that visually correspond to each other. For example, the point in benchmark 2 used to calculate distance one is not the Intuitively corresponding to the point of benchmark 2; it is simply the closest point. The distance from Hausdorff considers polylines as simple sets of dots unordered. This problem is particularly important for very sinuous or with loops. Small distances can then be sent back to different lines. Similarly, pairs of dots cannot be considered to be matches. Nevertheless, this particularity has the advantage of reducing calculation time: the algorithmic complexity of this algorithm is linear. 
 
 
-This method seems to be working better than DTW because there is no need for the dataset to know if the first measurement of the first sequence must match the first measurement of the other sequence and that the last measurement of the first sequence must match the last measurement of the other sequence (but it must not be its only match). The method seems to be working better because it require less memory allocations. It as also less computational cost than the DTW the implementation that used is $O(N)$ which N is the size of the benchmarks being compared.
+This method seems to be working better than DTW because there is no need for the dataset to know if the first measurement of the first sequence must match the first measurement of the other sequence and that the last measurement of the first sequence must match the last measurement of the other sequence (but it must not be its only match). The method seems to be working better because it requires fewer memory allocations. It as also less computational cost than the DTW the implementation that used is $O(N)$ which N is the size of the benchmarks being compared.
 
 
 
-\subsection{Interpretation of results after running the algorithms}
+\subsection{ interpretation of results after running the algorithms}
 
-I ran each algorithm on each iterations of the barber problem presented above.
+I ran each algorithm on each iteration of the barber problem presented above.
 The one \& two measurements from figure from figure \ref{fig:bench_1_2}  are not similar in contrary to the three \& four from from figure \ref{fig:bench_2_3}, which are similar by human eyes.
 Each output of each algorithm is put inside this tabular.
 
@@ -345,12 +318,12 @@ The last result is the sum of each pair of the distance subsets are from each ot
 \label{result}
 \end{table}
 
-From the table above you identify that the smaller the distance / area difference the smaller the difference is in term of behaviour. Based of those result we can that assumed that for example when the DTW and / or the Directed Hausdorff distance is under 10 the behaviour is close to be the same. Based on other experiment the area and the curve length measure seems no be working well because it does not reflect a difference of behaviours nor and difference between all the measurements points. I choose the directed Hausdorff distance because the computational cost is lower than DTW and so I can run it on my computer and it require less data modifications.
+From the table above, you identify that the smaller the distance/area difference, the smaller the difference is in term of behaviour. Based on those result, we can that assumed that for example, when the DTW and/or the Directed Hausdorff distance is under 10, the behaviour is close to being the same. Based on another experiment, the area and the curve length measure seems no be working well because it does not reflect a difference of behaviours nor and the difference between all the measurements points. I choose the directed Hausdorff distance because the computational cost is lower than DTW and so I can run it on my computer, and it requires fewer data modifications.
 
 
 As expected, the only algorithm that seems to work is the directed Hausdorff algorithm because it is not influenced by the size of the dataset, indeed as the curve length increase the difference of the score increase. 
 I order to classify if a benchmark has changed between two commits, I have to found a threshold where, if the result of an algorithm would surpass this threshold it will mean that the benchmarks have changed from the previous commit. I order to get that threshold I labelled by hand all the benchmarks by hand. For 50 benchmarks by hand six have a real changed by human eyes and the rest have not changed between commit. Those 50 benchmarks could be corresponding to our training data. The threshold that seems to classify better is 20 because based on that, the result of the directed Hausdorff algorithm is that value that is better to separate the behaviour difference of benchmarks and those who have not different.
-I have put a threshold of 20 with the directed Hausdorff. When the directed Hausdorff value is more than 20 is interesting to look at the benchmark because it means that there is a significant difference between the two benchmarks. In the next section I will present few more example on the data that will prove the usability of the directed Hausdorff distance. 
+I have put a threshold of 20 with the directed Hausdorff. When the directed Hausdorff value is more than 20 is interesting to look at the benchmark because it means that there is a significant difference between the two benchmarks. In the next section, I will present a few more examples of the data that will prove the usability of the directed Hausdorff distance. 
 
 
 \subsection{Usage for different example}
@@ -406,15 +379,15 @@ A future approach would be to learn for those thresholds and maybe determine an 
 
 
 
-\section{Setup Of Rebench Data}
-This section will talk about more about the engineering process for rebench data and how it could be deployed and used in the future.\\
-I have developed a rest API to easily manipulate the data and allow to gain time in my analysis which was not possible with the rebenchDB project because I had first need to understand the whole codebase which I was not familiar with. I build the API with good principles such as REST principle and good coding practice so it can be reused for people that want to work with API in the future.
+\section{Setup Of ReBench Data}
+This section will talk about more about the engineering process for ReBench data and how it could be deployed and used in the future.\\
+I have developed a rest API to easily manipulate the data and allow to gain time in my analysis which was not possible with the ReBenchDB project because I had first need to understand the whole codebase which I was not familiar with. The project is built around an API with good principles such as REST principle and good coding practice so it can be reused for people that want to work with API in the future.
 
 \subsection{Building a REST API around the database structure}
 
-First thing I did was take the data collected, which is produced by rebench \citep{ReBench:2018}. The data is in Postgres SQL format, which is a language for communicating with a database. This computer language is notably very much used by web developers to describe with the data of a web site (Here a REST API).
+The first thing was to take the data collected, which is produced by ReBench \citep{ReBench:2018}. The data is in Postgres SQL format, which is a language for communicating with a database. This computer language is notably very much used by web developers to describe with the data of a web site (Here a REST API).
 
-To import the backup of the data produced by Rebench I am using this command which will import only the data and not the structure which is created by the node.js server.
+To import the backup of the data produced by ReBench, was to use this command which will import only the data and not the structure which is created by the node.js server.
 
 \begin{python}[h!]
 pg_dump --verbose -Fc -U postgres -h 0.0.0.0 -p 5432  -a --dbname=postgres > data.dump
@@ -441,13 +414,13 @@ After that, I needed to manipulate them, so I build a REST API which is a style 
     \item Links as a relationship between resources
 \end{itemize}
 
-Because of the data is created by rebench is from a PostgreSQL database the goal is to add a PostgreSQL connection so that we can retrieve information from a database and display that information in the application as a simple list.
-We will use PostgresqlQL as the database. For this, we will use an ORM (Object Relational Mapping). There are several ORM node.js such as Sequelize, type ORM and mongoose. The most suitable ORM in the case of rebenchDB is sequelize, indeed because of rebenchDB is developed in typescript and sequelize in javascript with typing in typescript it can be easily manipulated for developers if they retake the project. Sequelize allows the use of a database type: MySQL, Postgres, SQLite and Microsoft SQL Server but for this project, we will stick to Postgresql.
+Because of the data is created by ReBench is from a PostgreSQL database the goal is to add a PostgreSQL connection so that we can retrieve information from a database and display that information in the application as a simple list.
+We will use PostgresqlQL as the database. For this, we will use an ORM (Object Relational Mapping). There are several ORM node.js such as Sequelize, type ORM and mongoose. The most suitable ORM in the case of ReBenchDB is sequelize, indeed because of ReBenchDB is developed in typescript and sequelize in javascript with typing in typescript it can be easily manipulated for developers if they retake the project. Sequelize allows the use of a database type: MySQL, Postgres, SQLite and Microsoft SQL Server but for this project, we will stick to Postgresql.
 
-To communicate with the database, I'm using an ORM (Sequelize) between the database language SQL and the javascript side \citep{pereira2016working}. The goal of Object Relational Mapping or O.R.M is to facilitate the manipulation of data stored in a Relational Database Management System within object programming languages (Postgresql and The node.js Server). ORMs offer to the developers' basic benefits, such as reducing time and effort and focusing on the analysis of benchmark data. The code is more simple to understand and has a better integration to programm language.
+To communicate with the database, I'm using an ORM (Sequelize) between the database language SQL and the javascript side \citep{pereira2016working}. The goal of Object Relational Mapping or ORM is to facilitate the manipulation of data stored in a Relational Database Management System within object programming languages (Postgresql and The node.js Server). ORMs offer to the developers' essential benefits, such as reducing time and effort and focusing on the analysis of benchmark data. The code is more simple to understand and has better integration to a programming language.
 
 
-To Serialise the data, I'm using TSOA, which is a framework to build REST.API in typescript it builds around express.js, node.js and typescript, it allow me to generate documentation and to make my code more robust by typing javascript.
+To Serialise the data, I'm using TSOA, which is a framework to build REST.API in typescript it builds around express.js, node.js and typescript, it allows me to generate documentation and to make my code more robust by typing javascript.
 
 For this project, I am only implementing the GET method for the route that need an id as the GET parameter. This means we should have a URL like this: /benchmarks/1. It's easy to do when you are building the road.
 
@@ -481,7 +454,7 @@ Now we can get the id parameter using the function parameters id. Then we use th
 
 \subsection{Documention}
 
-To expand further use of the work that I have done, I have generated little documentation about the API around the rebench data.
+To expand further use of the work that I have done, I have generated little documentation about the API around the ReBench data.
 Thanks to TSOA I only need to add interface of the data model, and it generates the documentation automatically
 
 Before talking about the tool, it is important to clarify the difference between Swagger and OpenAPI. But to sum up:
@@ -493,15 +466,15 @@ Before talking about the tool, it is important to clarify the difference between
 
 At first, the specification was called Swagger but upon acquisition by SmartBear the specification was given to the OpenAPI initiative and renamed to OpenAPI. The Swagger brand has been retained for commercial/open-source products that allow working with the specification.
 
-OpenAPI allows you to detail the operation of an API through a file in YAML or JSON format here for the master thesis it is in YAML which directly representing the description of each API routes, allows to the project to generate a website that will initially serve as a visual and understanding of the available routes but also a possibility of being able to test them \url{https://api.rebench.vatoth.dev/}.
+OpenAPI allows you to detail the operation of an API through a file in YAML or JSON format here for the master thesis it is in YAML which directly representing the description of each API routes, allows to the project to generate a website that will initially serve as a visual and understanding of the available routes but also a possibility of being able to test them \url{https://api.ReBench.vatoth.dev/}.
 
 
 
 \subsection{Deployement with Docker}
 
-To deploy the application, I am using Docker; this is an open-source software which is wrapped around a daemon in order to create and manage containers a container image is. It is a set of light and independent software processes, gathering all the files necessary for the execution of the methods: code, runtime, system tools, library and parameters. They can be used to run Linux or Windows applications. So I dockerised the app to make it easier to deploy in the future. I also use docker-compose, it's a tool that allows to describe (in a YAML file) and manage (in the command line) several containers as a set of inter-connected services. In this application, I describe a set composed of 3 containers: Postgresql, the server node.js for the REST API and a python notebook to present the data. In the beginning, Docker was only used to manage the local working environment, for example, dependencies like PostgreSQL, which allowed me to separate the data from other databases on my computer.
+To deploy the application, I am using docker; this is an open-source software which is wrapped around a daemon in order to create and manage containers a container image is. It is a set of light and independent software processes, gathering all the files necessary for the execution of the methods: code, runtime, system tools, library and parameters. They can be used to run Linux or Windows applications. So I dockerised the app to make it easier to deploy in the future. I also use docker-compose, it's a tool that allows to describe (in a YAML file) and manage (in the command line) several containers as a set of inter-connected services. In this application, I describe a group composed of 3 containers: Postgresql, the server node.js for the REST API and a python notebook to present the data. In the beginning, docker was only used to manage the local working environment, for example, dependencies like PostgreSQL, which allowed me to separate the data from other databases on my computer.
 
-The stack of the project in production is launched like this in production; it builds and launches Docker and does the network mapping between them.
+The stack of the project in production is launched like this in production; it builds and launches docker and does the network mapping between them.
 
 docker-composes -f docker-composes.yml -f docker-composes.production.yml up --build -d
 
@@ -509,25 +482,26 @@ You can see the docker-compose.yml file in the Github repository \url{https://gi
 
 \section{Evaluation}
 
-The objective was to implement a way to indentify behaviour difference in bench marking between two benchmark. The directed Hausdorff distance seems helpfull for given example. There is some problem with data available and given the time frame, indeed I don't know if its work for more benchmark it seems to work given examples. \\
-Also is not fully automatic because the user need to kind of guess the threshold which is not suitable to fully automatic. It would have help if I had a database where the data is labelled for example with two class "not different" / "different" so it can be identify if the directed Hausdorff distance works for a lot more example. \\
-The distance can be very high when the benchmarks as a lot of measurements the threshold need to be adapted depending on the size of each benchmarks iterations. The distance calculated by the directed Hausdorff distance can be very high if there is a lot of iterations altought there no such difference by human eyes between the two benchmarks.
-The outliers removal techniques seems to be sufficiant and be upgrade with a database of benchmark data that have those outliers labelled and so it can be done supervised techniques on those benchmarks outliers.
+The objective was to implement a way to identify behaviour difference in benchmarking between two benchmarks. The directed Hausdorff distance seems helpful for the given an example. There is some problem with data available, and given the time frame, indeed I don't know if its work for more benchmark, it seems to work given examples. \\
+Also is not fully automatic because the user needs to kind of guess the threshold which is not suitable to fully automatic. It would have help if I had a database where the data is labelled for example with two class "not different" / "different" so it can be identified if the directed Hausdorff distance works for a lot more example. \\
+The distance can be very high when the benchmarks as a lot of measurements the threshold need to be adapted depending on the size of each benchmarks iterations. The distance calculated by the directed Hausdorff distance can be very high if there is a lot of iterations although there no such difference by human eyes between the two benchmarks.
+The outliers removal techniques seem to be sufficient and be upgrade with a database of benchmark data that have those outliers labelled and so it can be done supervised techniques on those benchmarks outliers.
 
 
 
 \section{Conclusion}
 
 
-This master thesis work was mainly on the analysis of Rebench data, and The goal was to identify the performance difference in the data produced by Rebench Data. First, I have applied from \citep{barrett2017virtual} warm-up paper which was not enough to identify behaviour differences because it only characterised the behaviour and lose a lot of information by oversimplifying the data. There also an application of outliers removal (Garbage collection...) in benchmarks data that have been reuse for all data preparation before the algorithms.  Then this dissertation was more focus on reviewing some curve comparison algorithm that is used in statistical analysis and applying them to compare them. After the comparison, the conclusion of this dissertation was that by using the Hausdorff to quantify the difference between two curves, we are able to identify if a benchmark as changed of behaviour between two iterations of the code.
+This master thesis work was mainly on the analysis of ReBench data, and The goal was to identify the performance difference in the data produced by ReBench data. We have seen a research from \citep{barrett2017virtual} warm-up paper which was not enough to identify behaviour differences because it only characterised the behaviour and lose a lot of information by oversimplifying the data. There also an application of outliers removal (Garbage collection...) in benchmarks data that have been reuse for all data preparation before the algorithms.  Then this dissertation was more focus on reviewing some curve comparison algorithm that is used in statistical analysis and applying them to compare them. After the comparison, the conclusion of this dissertation was that by using the Hausdorff to quantify the difference between two curves, we are able to identify if a benchmark as changed of behaviour between two iterations of the program.
+
 
 \section{Future Work}
 
-How can you use the work from this dissertation?
 When you have made a modification to your code, its would be useful to know if that modification has an impact on the performance of the program (positively or negatively) to understand that the benchmark data is helpful to look at and require further analysis. So The first things that might be good to look at are to integrate the report to GitHub. There is a new  at GitHub which is  actions \url{https://docs.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions}
-After triggering the CI by committing to the project would be after the ReBench run, take the data by the commit from the RebenchDB and after trigger the warm-up analysis script that you can find here.
-You could also compare the Directed Hausdorff score from the previous commit and see if there is a relevant change of behaviour between the benchmarks.  The classification of warmup stage can be also reused in an python program.
-The API is openly accessible at this address \url{https://api.rebench.vatoth.dev} and/or can deployed easily with docker. This allow other developper that can used rebench data to manipulate them easily.
+After triggering the CI by committing to the project would be after the ReBench run, take the data by the commit from the ReBenchDB and after trigger the script for analysis analysis script that you can find here.
+You could also compare the Directed Hausdorff score from the previous commit and see if there is a relevant change of behaviour between the benchmarks.  The classification of the warm-up stage can also be reused in a python program.
+The API is openly accessible at this address \url{https://api.ReBench.vatoth.dev} and/or can be deployed easily with docker. This allows other developers that can use ReBench data to manipulate them easily.
+There is also can be work done on outliers analysis in order to reduce noise on ReBench data.
 
 \bibliography{reference}
 
